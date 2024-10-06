@@ -1,12 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ProxyLibrary.Buffer
+﻿namespace ProxyLibrary.Buffer
 {
-    internal class IBuffer
+    /// <summary>
+    /// Buffer interface. Layer between receiver and sender
+    /// </summary>
+    public interface IBuffer
     {
+        /// <summary>
+        /// Reads data from connection buffer
+        /// </summary>
+        public void ReadData();
+
+        /// <summary>
+        /// Sends data to next destination
+        /// </summary>
+        public void SendData();
+
+        /// <summary>
+        /// Prepares data
+        /// </summary>
+        public void PrepareData();
     }
 }
