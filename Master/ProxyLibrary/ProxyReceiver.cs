@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using ProxyLibrary.Buffer;
+using System.Net;
 using System.Net.Sockets;
 
 namespace ProxyLibrary
@@ -8,6 +9,8 @@ namespace ProxyLibrary
     /// </summary>
     public class ProxyReceiver
     {
+        List<IBuffer> _buffers = new();
+
         /// <summary>
         /// Address to listen
         /// </summary>
@@ -55,6 +58,14 @@ namespace ProxyLibrary
             {
                 _serverThread.Join();
             }
+
+            List<Task> closeBuffersTasks = new();
+
+            _buffers.ForEach(x => closeBuffersTasks.Add(new Task(() => { x.Stop(); })));
+
+            closeBuffersTasks.ForEach(x => x.Start());
+
+            Task.WaitAll(closeBuffersTasks.ToArray());
         }
         
         /// <summary>

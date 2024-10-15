@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Concurrent;
 using System.Net.Sockets;
 using Common;
 
@@ -12,12 +13,27 @@ namespace ProxyLibrary.Buffer
         /// <summary>
         /// Tcp client used for connection
         /// </summary>
-        private TcpClient _client;
+        private TcpClient _client; 
 
         /// <summary>
         /// Buffer with last messages
         /// </summary>
-        private List<ProxyObject> _lastMessages = new();
+        private ConcurrentQueue<ProxyObject> _lastMessages = new();
+
+        /// <summary>
+        /// Tokens to send
+        /// </summary>
+        private int _tokens = 0;
+
+        /// <summary>
+        /// Object to sned next
+        /// </summary>
+        private ProxyObject? _objectToSend = null;
+
+        /// <summary>
+        /// Sender
+        /// </summary>
+        private ProxySender? _sender = null;
 
         /// <summary>
         /// Constructor. Set tcp client to receive data
@@ -41,10 +57,46 @@ namespace ProxyLibrary.Buffer
 
             ProxyObject message = ProxyObject.Desserialize(buffer);
 
-            _lastMessages.Add(message);
+            _lastMessages.Enqueue(message);
         }
 
         /// <inheritdoc/>
-        public abstract void SendData();
+        public void SendData(int tokens)
+        {
+            _tokens += tokens;
+
+            bool hasValue = true;
+
+            if (_objectToSend == null)
+            {
+                hasValue = _lastMessages.TryDequeue(out _objectToSend);
+            }
+
+            if (!hasValue)
+            {
+                return;
+            }
+
+            if (_tokens >= _objectToSend.Data.Length)
+            {
+                _tokens -= _objectToSend.Data.Length;
+
+                if (_sender == null)
+                {
+                    _sender = new ProxySender(_objectToSend.NextAddress, _objectToSend.NextPort);
+                }
+
+                _sender.SendData(_objectToSend.Serialize());
+
+                _objectToSend = null;
+            } 
+        }
+
+        /// <inheritdoc/>
+        public void Stop()
+        {
+            _client.Close();
+            _client.Dispose();
+        }
     }
 }

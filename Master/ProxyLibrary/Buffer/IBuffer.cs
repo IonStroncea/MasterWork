@@ -13,11 +13,17 @@
         /// <summary>
         /// Sends data to next destination
         /// </summary>
-        public void SendData();
+        /// <param name="tokens">Tokens allocated</param>
+        public void SendData(int tokens);
 
         /// <summary>
         /// Prepares data
         /// </summary>
         public void PrepareData();
+
+        /// <summary>
+        /// Stop
+        /// </summary>
+        public void Stop();
     }
 }
