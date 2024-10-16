@@ -28,7 +28,7 @@ namespace ProxyLibrary.Buffer
         /// <summary>
         /// Object to sned next
         /// </summary>
-        private ProxyObject? _objectToSend = null;
+        protected ProxyObject? _objectToSend = null;
 
         /// <summary>
         /// Sender
@@ -45,7 +45,7 @@ namespace ProxyLibrary.Buffer
         }
 
         /// <inheritdoc/>
-        public abstract void PrepareData();
+        public abstract List<ProxyObject> PrepareData();
 
         /// <inheritdoc/>
         public void ReadData()
@@ -86,7 +86,9 @@ namespace ProxyLibrary.Buffer
                     _sender = new ProxySender(_objectToSend.NextAddress, _objectToSend.NextPort);
                 }
 
-                _sender.SendData(_objectToSend.Serialize());
+                List<ProxyObject> proxyObjects = PrepareData();
+
+                proxyObjects.ForEach(x => _sender.SendData(x.Serialize()));
 
                 _objectToSend = null;
             } 

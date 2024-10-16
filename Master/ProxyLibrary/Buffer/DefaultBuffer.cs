@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using Common;
+using System.Net.Sockets;
 
 namespace ProxyLibrary.Buffer
 {
@@ -13,9 +14,9 @@ namespace ProxyLibrary.Buffer
         }
 
         /// <inheritdoc/>
-        public override void PrepareData()
+        public override List<ProxyObject> PrepareData()
         {
-
+            return [_objectToSend];
         }
     }
 }

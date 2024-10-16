@@ -1,4 +1,6 @@
-﻿namespace ProxyLibrary.Buffer
+﻿using Common;
+
+namespace ProxyLibrary.Buffer
 {
     /// <summary>
     /// Buffer interface. Layer between receiver and sender
@@ -19,7 +21,7 @@
         /// <summary>
         /// Prepares data
         /// </summary>
-        public void PrepareData();
+        public List<ProxyObject> PrepareData();
 
         /// <summary>
         /// Stop
