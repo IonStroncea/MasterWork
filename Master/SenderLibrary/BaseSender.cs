@@ -29,6 +29,11 @@ namespace SenderLibrary
         private int _proxyPort;
 
         /// <summary>
+        /// Tcp client
+        /// </summary>
+        private TcpClient _client;
+
+        /// <summary>
         /// Constructor. Sets server address and proxy address
         /// </summary>
         /// <param name="serverAddress">Server address. End connection</param>
@@ -41,6 +46,8 @@ namespace SenderLibrary
             _serverPort = serverPort;
             _proxyAddress = proxyAddress;
             _proxyPort = proxyPort;
+
+            _client = new TcpClient(_proxyAddress, _proxyPort);
         }
 
         /// <summary>
@@ -62,14 +69,17 @@ namespace SenderLibrary
             SendData(data);
         }
 
+        public void Stop()
+        {
+            _client.Close();
+        }
+
         /// <summary>
         /// Send data to proxy
         /// </summary>
         /// <param name="data">Data</param>
         public void SendData(byte[] data)
         {
-            using TcpClient client = new TcpClient(_proxyAddress, _proxyPort);
-
             ProxyObject sendObject = new ();
 
             sendObject.Data = data;
@@ -78,11 +88,8 @@ namespace SenderLibrary
 
             byte[] messageBytes = sendObject.Serialize();
 
-            NetworkStream stream = client.GetStream();
+            NetworkStream stream = _client.GetStream();
             stream.Write(messageBytes, 0, messageBytes.Length);
-
-            stream.Close();
-            client.Close();
         }
     }
 }
