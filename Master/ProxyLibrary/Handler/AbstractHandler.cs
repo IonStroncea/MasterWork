@@ -54,6 +54,15 @@ namespace ProxyLibrary.Handler
         public void Stop()
         {
             _disposed = true;
+
+            List<Task> closeBuffersTasks = new();
+
+            _buffers.ToList().ForEach(x => closeBuffersTasks.Add(new Task(() => { x.Stop(); })));
+
+            closeBuffersTasks.ForEach(x => x.Start());
+
+            Task.WaitAll(closeBuffersTasks.ToArray());
+
             _thread.Join();
         }
 

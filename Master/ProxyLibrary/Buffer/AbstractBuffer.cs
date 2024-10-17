@@ -36,12 +36,34 @@ namespace ProxyLibrary.Buffer
         private ProxySender? _sender = null;
 
         /// <summary>
+        /// Buffer thread.
+        /// </summary>
+        private Thread _bufferThread;
+
+        /// <summary>
+        /// Disposed flag
+        /// </summary>
+        private volatile bool _disposed = false;
+
+        /// <summary>
         /// Constructor. Set tcp client to receive data
         /// </summary>
         /// <param name="client">Tcp client</param>
         public AbstractBuffer(TcpClient client)
         {
             _client = client;
+
+
+            _bufferThread = new Thread(() =>
+            {
+                while (!_disposed)
+                {
+                    ReadData();
+                    Thread.Sleep(1);
+                }
+            });
+
+            _bufferThread.Start();
         }
 
         /// <inheritdoc/>
@@ -97,6 +119,7 @@ namespace ProxyLibrary.Buffer
         /// <inheritdoc/>
         public void Stop()
         {
+            _disposed = true;
             _client.Close();
             _client.Dispose();
         }

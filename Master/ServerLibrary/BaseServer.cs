@@ -1,25 +1,13 @@
-﻿using ProxyLibrary.Buffer;
-using ProxyLibrary.Handler;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 
-namespace ProxyLibrary
+namespace ServerLibrary
 {
     /// <summary>
-    /// Receives data
+    /// Basic server
     /// </summary>
-    public class ProxyReceiver
+    public class BaseServer
     {
-        /// <summary>
-        /// Handler
-        /// </summary>
-        AbstractHandler _handler;
-
-        /// <summary>
-        /// BufferType
-        /// </summary>
-        private BufferEnum _bufferType;
-
         /// <summary>
         /// Address to listen
         /// </summary>
@@ -29,11 +17,11 @@ namespace ProxyLibrary
         /// Port to listen
         /// </summary>
         private int _port;
-        
+
         /// <summary>
-        /// Packet size
+        /// Buffers of next step
         /// </summary>
-        private int _packetSize;
+        List<ServerConnctionHandler> _handlers = new();
 
         /// <summary>
         /// Listener
@@ -53,18 +41,12 @@ namespace ProxyLibrary
         /// <summary>
         /// Constructor. Sets address and port to listen to
         /// </summary>
-        /// <param name="address">Address</param>
-        /// <param name="port">Port</param>
-        /// <param name="bufferType">Buffer type</param>
-        /// <param name="packetSize">Size of each message</param>
-        ///  <param name="handler">Handles when to send messages</param>
-        public ProxyReceiver(string address, int port, BufferEnum bufferType, int packetSize, AbstractHandler handler)
+        /// <param name="address"></param>
+        /// <param name="port"></param>
+        public BaseServer(string address, int port)
         {
             _address = address;
-            _port = port;
-            _bufferType = bufferType;
-            _packetSize = packetSize;
-            _handler = handler;
+
         }
 
         /// <summary>
@@ -79,9 +61,15 @@ namespace ProxyLibrary
                 _serverThread.Join();
             }
 
-            _handler.Stop();
+            List<Task> closeBuffersTasks = new();
+
+            _handlers.ForEach(x => closeBuffersTasks.Add(new Task(() => { x.Stop(); })));
+
+            closeBuffersTasks.ForEach(x => x.Start());
+
+            Task.WaitAll(closeBuffersTasks.ToArray());
         }
-        
+
         /// <summary>
         /// Starts server
         /// </summary>
@@ -95,7 +83,7 @@ namespace ProxyLibrary
             IPAddress address = IPAddress.Parse(_address);
             _server = new TcpListener(address, _port);
 
-            _serverThread = new Thread(() => { ServerLoop();});
+            _serverThread = new Thread(() => { ServerLoop(); });
             _serverThread.Start();
         }
 
@@ -115,14 +103,7 @@ namespace ProxyLibrary
             {
                 TcpClient client = _server.AcceptTcpClient();
 
-                if (_bufferType == BufferEnum.SameSize)
-                {
-                    _handler.AddBuffer(new SameSizeBuffer(client, _packetSize));
-                }
-                else
-                {
-                    _handler.AddBuffer(new DefaultBuffer(client));
-                }
+                
             }
         }
     }
