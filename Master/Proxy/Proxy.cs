@@ -16,7 +16,7 @@ namespace Proxy
         /// Arguments -f address of server 
         /// -p port of server 
         /// -t time to live in seconds
-        /// -buffer buffer type. DefaultBuffer(default) or SameSizeBuffer
+        /// -buffer buffer type. Default(default) or SameSize
         /// -size packet size
         /// -handler handler type.RegularHandler(default) or SimultaniousHandler
         /// -tokens tokens per turn
@@ -25,11 +25,11 @@ namespace Proxy
         public static void Main(string[] args)
         {
             string address = "127.0.0.1";
-            string bufferType = "";
+            string bufferType = "Default";
             string handlerType = "";
             int port = 10000;
-            int packetSize = 500;
-            int tokensPerTurn = 100;
+            int packetSize = 500000;
+            int tokensPerTurn = 5000000;
             int timeToWait = 300;
 
             int ttl = -1;

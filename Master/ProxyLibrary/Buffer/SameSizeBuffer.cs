@@ -26,9 +26,9 @@ namespace ProxyLibrary.Buffer
 
 
         /// <imheritdoc/>
-        public override List<ProxyObject> PrepareData()
+        public override List<ProxyData> PrepareData()
         {
-            List<ProxyObject> resultList = new();
+            List<ProxyData> resultList = new();
 
             for (int i = 0; i < _objectToSend.Data.Length; i += _packetSize)
             {
@@ -41,11 +41,9 @@ namespace ProxyLibrary.Buffer
                 {
                     Array.Copy(_objectToSend.Data, i, data, 0, _objectToSend.Data.Length - i);
                 }
-                resultList.Add(new ProxyObject
+                resultList.Add(new ProxyData
                 {
-                    Data = data,
-                    NextAddress = _objectToSend.NextAddress,
-                    NextPort = _objectToSend.NextPort
+                    Data = data
                 });
             }
 

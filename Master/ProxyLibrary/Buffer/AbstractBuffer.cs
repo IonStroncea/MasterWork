@@ -18,17 +18,17 @@ namespace ProxyLibrary.Buffer
         /// <summary>
         /// Buffer with last messages
         /// </summary>
-        private ConcurrentQueue<ProxyObject> _lastMessages = new();
+        private ConcurrentQueue<ProxyData> _lastMessages = new();
 
         /// <summary>
         /// Tokens to send
         /// </summary>
-        private int _tokens = 0;
+        private int _tokens = 50000;
 
         /// <summary>
         /// Object to sned next
         /// </summary>
-        protected ProxyObject? _objectToSend = null;
+        protected ProxyData? _objectToSend = null;
 
         /// <summary>
         /// Sender
@@ -67,19 +67,40 @@ namespace ProxyLibrary.Buffer
         }
 
         /// <inheritdoc/>
-        public abstract List<ProxyObject> PrepareData();
+        public abstract List<ProxyData> PrepareData();
 
         /// <inheritdoc/>
         public void ReadData()
         {
             NetworkStream stream = _client.GetStream();
 
-            byte[] buffer = new byte[stream.Length];
-            stream.Read(buffer, 0, buffer.Length);
+            if (stream.DataAvailable)
+            {
 
-            ProxyObject message = ProxyObject.Desserialize(buffer);
+                byte[] buffer = Array.Empty<byte>();
 
-            _lastMessages.Enqueue(message);
+                while (stream.DataAvailable)
+                {
+                    buffer = buffer.Concat(new byte[1024]).ToArray();
+                    stream.Read(buffer, 0, buffer.Length);
+                }
+
+                if (buffer.Length > 0)
+                {
+                    if (_sender == null)
+                    {
+                        ProxyObject message = ProxyObject.Desserialize(buffer);
+                        _sender = new ProxySender(message.NextAddress, message.NextPort);
+                        Console.Write($"Created sender to server {message.NextAddress} {message.NextPort}");
+                    }
+                    else
+                    {
+                        ProxyData message = new ProxyData { Data = buffer};
+                        Console.WriteLine($"Received data of size {buffer.Length} bytes");
+                        _lastMessages.Enqueue(message);
+                    }
+                }
+            }
         }
 
         /// <inheritdoc/>
@@ -103,14 +124,9 @@ namespace ProxyLibrary.Buffer
             {
                 _tokens -= _objectToSend.Data.Length;
 
-                if (_sender == null)
-                {
-                    _sender = new ProxySender(_objectToSend.NextAddress, _objectToSend.NextPort);
-                }
+                List<ProxyData> proxyObjects = PrepareData();
 
-                List<ProxyObject> proxyObjects = PrepareData();
-
-                proxyObjects.ForEach(x => _sender.SendData(x.Serialize()));
+                proxyObjects.ForEach(x => _sender.SendData(x.Data));
 
                 _objectToSend = null;
             } 

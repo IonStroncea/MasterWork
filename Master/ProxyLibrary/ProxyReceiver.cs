@@ -94,6 +94,7 @@ namespace ProxyLibrary
 
             IPAddress address = IPAddress.Parse(_address);
             _server = new TcpListener(address, _port);
+            _server.Start();
 
             _serverThread = new Thread(() => { ServerLoop();});
             _serverThread.Start();

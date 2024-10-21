@@ -5,7 +5,7 @@ namespace ServerLibrary
     /// <summary>
     /// Handles on connection
     /// </summary>
-    public class ServerConnctionHandler
+    public class ServerConnectionHandler
     {
         /// <summary>
         /// Tcp client used for connection
@@ -26,7 +26,7 @@ namespace ServerLibrary
         /// Constructor. Set tcp client to receive data
         /// </summary>
         /// <param name="client">Tcp client</param>
-        public ServerConnctionHandler(TcpClient client)
+        public ServerConnectionHandler(TcpClient client)
         {
             _client = client;
 
@@ -49,11 +49,18 @@ namespace ServerLibrary
         public void ReadData()
         {
             NetworkStream stream = _client.GetStream();
+            if (stream.DataAvailable)
+            {
+                byte[] buffer = Array.Empty<byte>();
 
-            byte[] buffer = new byte[stream.Length];
-            stream.Read(buffer, 0, buffer.Length);
+                while (stream.DataAvailable)
+                {
+                    buffer = buffer.Concat(new byte[1024]).ToArray();
+                    stream.Read(buffer, 0, buffer.Length);
+                }
 
-            Console.WriteLine($"Received data from {_client.Client.LocalEndPoint} of size {buffer.Length} bytes");
+                Console.WriteLine($"Received data from {_client.Client.LocalEndPoint} of size {buffer.Length} bytes");
+            }
         }
 
         /// <summary>

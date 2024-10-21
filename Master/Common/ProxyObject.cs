@@ -20,11 +20,6 @@ namespace Common
         public int NextPort;
 
         /// <summary>
-        /// Data
-        /// </summary>
-        public byte[] Data = [];
-
-        /// <summary>
         /// Serialize object
         /// </summary>
         /// <returns></returns>
@@ -36,7 +31,6 @@ namespace Common
                 {
                     writer.Write(NextAddress);
                     writer.Write(NextPort);
-                    writer.Write(Data);
                 }
                 return m.ToArray();
             }
@@ -56,8 +50,6 @@ namespace Common
                 {
                     result.NextAddress = reader.ReadString();
                     result.NextPort = reader.ReadInt32();
-                    int dataBytes = ASCIIEncoding.ASCII.GetByteCount(result.NextAddress);
-                    result.Data = reader.ReadBytes(data.Length - dataBytes - sizeof(int));
                 }
             }
             return result;

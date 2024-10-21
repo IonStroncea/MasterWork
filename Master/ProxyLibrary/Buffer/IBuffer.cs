@@ -21,7 +21,7 @@ namespace ProxyLibrary.Buffer
         /// <summary>
         /// Prepares data
         /// </summary>
-        public List<ProxyObject> PrepareData();
+        public List<ProxyData> PrepareData();
 
         /// <summary>
         /// Stop

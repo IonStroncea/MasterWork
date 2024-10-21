@@ -70,7 +70,7 @@ namespace Sender
                 while (true)
                 {
                     sender.SendRandomSizeData();
-                    Thread.Sleep(5);
+                    Thread.Sleep(500);
                 }
             }
         }

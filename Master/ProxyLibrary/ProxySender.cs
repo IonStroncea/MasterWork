@@ -60,10 +60,12 @@ namespace ProxyLibrary
                 tcpClient = new TcpClient(_serverAddress, _serverPort);
             }
 
+            Console.WriteLine($"Send {data.Length} bytes to server {_serverAddress}:{_serverPort}");
+
             NetworkStream stream = tcpClient.GetStream();
             stream.Write(data, 0, data.Length);
 
-            stream.Close();
+            Console.WriteLine($"Succesfully sent {data.Length} bytes to server {_serverAddress}:{_serverPort}");
         }
     }
 }

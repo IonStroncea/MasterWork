@@ -21,7 +21,7 @@ namespace ServerLibrary
         /// <summary>
         /// Buffers of next step
         /// </summary>
-        List<ServerConnctionHandler> _handlers = new();
+        List<ServerConnectionHandler> _handlers = new();
 
         /// <summary>
         /// Listener
@@ -46,7 +46,7 @@ namespace ServerLibrary
         public BaseServer(string address, int port)
         {
             _address = address;
-
+            _port = port;
         }
 
         /// <summary>
@@ -82,9 +82,11 @@ namespace ServerLibrary
 
             IPAddress address = IPAddress.Parse(_address);
             _server = new TcpListener(address, _port);
+            _server.Start();
 
             _serverThread = new Thread(() => { ServerLoop(); });
             _serverThread.Start();
+            Console.WriteLine($"Started server {_address}:{_port}");
         }
 
         /// <summary>
@@ -103,7 +105,8 @@ namespace ServerLibrary
             {
                 TcpClient client = _server.AcceptTcpClient();
 
-                
+                _handlers.Add(new ServerConnectionHandler(client));
+                Console.WriteLine($"Client connected");
             }
         }
     }
