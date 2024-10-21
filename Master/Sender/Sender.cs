@@ -1,18 +1,24 @@
-﻿using ServerLibrary;
+﻿using SenderLibrary;
 using System.Diagnostics;
 
-namespace Server
+namespace Sender
 {
-    internal class Program
+    /// <summary>
+    /// Sender console class
+    /// </summary>
+    public class Sender
     {
         /// <summary>
         /// Main program
         /// </summary>
-        /// <param name="args">Arguments -a address of server -p port of server -t time to live in seconds</param>
-        static void Main(string[] args)
+        /// <param name="args">Arguments -f address of server -p port of server -fp proxy address -pp proxy port -t time to live in seconds</param>
+        public static void Main(string[] args)
         {
-            string address = "";
-            int port = 0;
+            string address = "127.0.0.1";
+            int port = 9000;
+
+            string proxyAddress = "127.0.0.1";
+            int proxyPort = 10000;
 
             int ttl = -1;
 
@@ -26,16 +32,24 @@ namespace Server
                 port = int.Parse(args[args.ToList().IndexOf("-p") + 1]);
             }
 
+            if (args.ToList().Contains("-fp"))
+            {
+                proxyAddress = args[args.ToList().IndexOf("-fp") + 1];
+            }
+            if (args.ToList().Contains("-pp"))
+            {
+                proxyPort = int.Parse(args[args.ToList().IndexOf("-pp") + 1]);
+            }
+
             if (args.ToList().Contains("-t"))
             {
                 ttl = int.Parse(args[args.ToList().IndexOf("-t") + 1]);
             }
 
-            BaseServer server = new BaseServer(address, port);
-            server.Start();
+            BaseSender sender = new BaseSender(address, port, proxyAddress, proxyPort);
 
             if (ttl > -1)
-            {
+            { 
                 TimeSpan toLive = TimeSpan.FromSeconds(ttl);
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
@@ -45,14 +59,19 @@ namespace Server
 
                 while (elapsed <= toLive)
                 {
+                    sender.SendRandomSizeData();
                     Thread.Sleep(5);
                     stopwatch.Stop();
                     elapsed = stopwatch.Elapsed;
                 }
-                server.Stop();
             }
-            else
+            else 
             {
+                while (true)
+                {
+                    sender.SendRandomSizeData();
+                    Thread.Sleep(5);
+                }
             }
         }
     }

@@ -120,6 +120,12 @@ namespace ProxyLibrary.Buffer
         public void Stop()
         {
             _disposed = true;
+
+            if (_sender != null)
+            {
+                _sender.Close();
+            }
+
             _client.Close();
             _client.Dispose();
         }
