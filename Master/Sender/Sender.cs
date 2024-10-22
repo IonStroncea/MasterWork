@@ -11,7 +11,8 @@ namespace Sender
         /// <summary>
         /// Main program
         /// </summary>
-        /// <param name="args">Arguments -f address of server -p port of server -fp proxy address -pp proxy port -t time to live in seconds -n name</param>
+        /// <param name="args">Arguments -f address of server -p port of server -fp proxy address -pp proxy port -t time to live in seconds -n name -total totalDataSize
+        /// -size dataSize</param>
         public static void Main(string[] args)
         {
             string address = "127.0.0.1";
@@ -22,6 +23,8 @@ namespace Sender
             int proxyPort = 10000;
 
             int ttl = -1;
+            int totalDataSize = -1;
+            int dataSize = 1024;
 
 
             if (args.ToList().Contains("-f"))
@@ -50,8 +53,20 @@ namespace Sender
             {
                 ttl = int.Parse(args[args.ToList().IndexOf("-t") + 1]);
             }
+            if (args.ToList().Contains("-total"))
+            {
+                totalDataSize = int.Parse(args[args.ToList().IndexOf("-total") + 1]);
+            }
+            if (args.ToList().Contains("-size"))
+            {
+                dataSize = int.Parse(args[args.ToList().IndexOf("-size") + 1]);
+            }
 
             BaseSender sender = new BaseSender(address, port, proxyAddress, proxyPort, name);
+            if (totalDataSize > -1)
+            {
+                sender.SendTotalAmountOfData(dataSize, totalDataSize);
+            }
 
             if (ttl > -1)
             { 
@@ -64,8 +79,15 @@ namespace Sender
 
                 while (elapsed <= toLive)
                 {
-                    sender.SendRandomSizeData();
-                    Thread.Sleep(1000);
+                    if (dataSize == -1)
+                    {
+                        sender.SendRandomSizeData();
+                    }
+                    else 
+                    {
+                        sender.SendSpecificSizeData(dataSize);
+                    }
+                    Thread.Sleep(5);
                     stopwatch.Stop();
                     elapsed = stopwatch.Elapsed;
                 }
@@ -74,8 +96,15 @@ namespace Sender
             {
                 while (true)
                 {
-                    sender.SendRandomSizeData();
-                    Thread.Sleep(1000);
+                    if (dataSize == -1)
+                    {
+                        sender.SendRandomSizeData();
+                    }
+                    else
+                    {
+                        sender.SendSpecificSizeData(dataSize);
+                    }
+                    Thread.Sleep(5);
                 }
             }
         }

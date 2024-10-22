@@ -82,6 +82,24 @@ namespace SenderLibrary
         }
 
         /// <summary>
+        /// Send X amount of data with packets of Y size
+        /// </summary>
+        /// <param name="dataSize">Packet size</param>
+        /// <param name="totalData">Total data</param>
+        public void SendTotalAmountOfData(int dataSize, int totalData)
+        {
+            int sentdata = 0;
+
+            while (sentdata < totalData)
+            {
+                sentdata += dataSize;
+                SendSpecificSizeData(dataSize);
+
+                Thread.Sleep(5);
+            }
+        }
+
+        /// <summary>
         /// Send data of specific size to proxy
         /// </summary>
         /// <param name="dataSize">DataSize</param>
@@ -110,11 +128,9 @@ namespace SenderLibrary
             NetworkStream stream = _client.GetStream();
             stream.Write(messageBytes, 0, messageBytes.Length);
 
-            if (_writer != null)
-            {
-                string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
-                _writer.WriteData(timestamp, messageBytes.Length.ToString());
-            }
+            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+            _writer.WriteData(timestamp, messageBytes.Length.ToString());
+            
 
             Console.WriteLine($"Successfully sent {messageBytes.Length} bytes to proxy {_proxyAddress}:{_proxyPort} to server {_serverAddress}:{_serverPort}");
         }
