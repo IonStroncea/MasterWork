@@ -9,13 +9,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyLibrary", "ProxyLibrary\ProxyLibrary.csproj", "{71E40EC5-C2F7-4798-BFDC-15B2FA472F7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerLibrary", "ServerLibrary\ServerLibrary.csproj", "{CADE3806-9D6E-440E-832F-33680940430B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerLibrary", "ServerLibrary\ServerLibrary.csproj", "{CADE3806-9D6E-440E-832F-33680940430B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sender", "Sender\Sender.csproj", "{FFBD5946-DC2E-41D6-8948-12418F061C8B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sender", "Sender\Sender.csproj", "{FFBD5946-DC2E-41D6-8948-12418F061C8B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csproj", "{45CBA3F4-02DA-490B-A62A-2909C31955E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server", "Server\Server.csproj", "{45CBA3F4-02DA-490B-A62A-2909C31955E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proxy", "Proxy\Proxy.csproj", "{7B428BBF-164B-4C22-A865-1CED9D6A284E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proxy", "Proxy\Proxy.csproj", "{7B428BBF-164B-4C22-A865-1CED9D6A284E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UssageMetter", "UssageMetter\UssageMetter.csproj", "{944B952C-4F68-4E5C-B3B1-288E911C9E70}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{7B428BBF-164B-4C22-A865-1CED9D6A284E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B428BBF-164B-4C22-A865-1CED9D6A284E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B428BBF-164B-4C22-A865-1CED9D6A284E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{944B952C-4F68-4E5C-B3B1-288E911C9E70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{944B952C-4F68-4E5C-B3B1-288E911C9E70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{944B952C-4F68-4E5C-B3B1-288E911C9E70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{944B952C-4F68-4E5C-B3B1-288E911C9E70}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

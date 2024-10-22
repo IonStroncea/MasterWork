@@ -51,7 +51,7 @@ namespace Sender
                 ttl = int.Parse(args[args.ToList().IndexOf("-t") + 1]);
             }
 
-            BaseSender sender = new BaseSender(address, port, proxyAddress, proxyPort);
+            BaseSender sender = new BaseSender(address, port, proxyAddress, proxyPort, name);
 
             if (ttl > -1)
             { 
