@@ -1,4 +1,6 @@
-﻿using System.Net.Sockets;
+﻿using Common;
+using System.Globalization;
+using System.Net.Sockets;
 using System.Text;
 
 namespace ServerLibrary
@@ -27,6 +29,11 @@ namespace ServerLibrary
         /// Caller id
         /// </summary>
         private string _callerId = string.Empty;
+        
+        /// <summary>
+        /// CSV writer
+        /// </summary>
+        private CSVWriter? _writer;
 
         /// <summary>
         /// Constructor. Set tcp client to receive data
@@ -69,6 +76,8 @@ namespace ServerLibrary
 
                     bufferString = bufferString.Take(readString).ToArray();
                     _callerId = Encoding.ASCII.GetString(bufferString);
+
+                    _writer = new CSVWriter(_callerId);
                     return;
                 }
 
@@ -80,7 +89,11 @@ namespace ServerLibrary
                     read+=stream.Read(buffer, 0, buffer.Length);
                 }
 
-                Console.WriteLine($"Received data from {_callerId} of size {read} bytes");
+                if (_writer != null)
+                {
+                    string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+                    _writer.WriteData(timestamp,read.ToString());
+                }
             }
         }
 
@@ -92,6 +105,10 @@ namespace ServerLibrary
             _disposed = true;
             _client.Close();
             _client.Dispose();
+            if(_writer != null ) 
+            {
+                _writer.Close();
+            }
         }
     }
 }

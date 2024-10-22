@@ -37,5 +37,13 @@ namespace Common
 
             _writer.WriteLine(lineToWrite);
         }
+
+        /// <summary>
+        /// Close
+        /// </summary>
+        public void Close()
+        { 
+            _writer.Close();
+        }
     }
 }

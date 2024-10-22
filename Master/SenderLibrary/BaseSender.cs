@@ -1,4 +1,5 @@
 ﻿using Common;
+using System.Globalization;
 using System.Net.Sockets;
 
 namespace SenderLibrary
@@ -39,6 +40,11 @@ namespace SenderLibrary
         private string _name;
 
         /// <summary>
+        /// CSV writer
+        /// </summary>
+        private CSVWriter _writer;
+
+        /// <summary>
         /// Constructor. Sets server address and proxy address
         /// </summary>
         /// <param name="serverAddress">Server address. End connection</param>
@@ -53,10 +59,11 @@ namespace SenderLibrary
             _proxyAddress = proxyAddress;
             _proxyPort = proxyPort;
             _name = name;
+            _writer = new CSVWriter(_name);
 
             _client = new TcpClient(_proxyAddress, _proxyPort);
 
-            ProxyObject startMessage = new() { NextAddress = serverAddress, NextPort = serverPort, CallerId = name };
+            ProxyObject startMessage = new() { NextAddress = serverAddress, NextPort = serverPort, CallerId = _name };
             byte[] messageBytes = startMessage.Serialize();
 
             NetworkStream stream = _client.GetStream();
@@ -87,6 +94,7 @@ namespace SenderLibrary
         public void Stop()
         {
             _client.Close();
+            _writer.Close();
         }
 
         /// <summary>
@@ -101,6 +109,12 @@ namespace SenderLibrary
 
             NetworkStream stream = _client.GetStream();
             stream.Write(messageBytes, 0, messageBytes.Length);
+
+            if (_writer != null)
+            {
+                string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+                _writer.WriteData(timestamp, messageBytes.Length.ToString());
+            }
 
             Console.WriteLine($"Successfully sent {messageBytes.Length} bytes to proxy {_proxyAddress}:{_proxyPort} to server {_serverAddress}:{_serverPort}");
         }
