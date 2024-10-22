@@ -34,22 +34,29 @@ namespace SenderLibrary
         private TcpClient _client;
 
         /// <summary>
+        /// Name of sender
+        /// </summary>
+        private string _name;
+
+        /// <summary>
         /// Constructor. Sets server address and proxy address
         /// </summary>
         /// <param name="serverAddress">Server address. End connection</param>
         /// <param name="serverPort">Server port. End connection</param>
         /// <param name="proxyAddress">Proxy address. Intermediate connection</param>
         /// <param name="proxyPort">Proxy address. Intermediate connectio</param>
-        public BaseSender(string serverAddress, int serverPort, string proxyAddress, int proxyPort)
+        /// <param name="name">Name of sender</param>
+        public BaseSender(string serverAddress, int serverPort, string proxyAddress, int proxyPort, string name)
         {
             _serverAddress = serverAddress;
             _serverPort = serverPort;
             _proxyAddress = proxyAddress;
             _proxyPort = proxyPort;
+            _name = name;
 
             _client = new TcpClient(_proxyAddress, _proxyPort);
 
-            ProxyObject startMessage = new() { NextAddress = serverAddress, NextPort = serverPort, CallerId = "Caller_1"};
+            ProxyObject startMessage = new() { NextAddress = serverAddress, NextPort = serverPort, CallerId = name };
             byte[] messageBytes = startMessage.Serialize();
 
             NetworkStream stream = _client.GetStream();
