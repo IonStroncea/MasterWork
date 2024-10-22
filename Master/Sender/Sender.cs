@@ -60,7 +60,7 @@ namespace Sender
                 while (elapsed <= toLive)
                 {
                     sender.SendRandomSizeData();
-                    Thread.Sleep(5);
+                    Thread.Sleep(1000);
                     stopwatch.Stop();
                     elapsed = stopwatch.Elapsed;
                 }
@@ -70,7 +70,7 @@ namespace Sender
                 while (true)
                 {
                     sender.SendRandomSizeData();
-                    Thread.Sleep(500);
+                    Thread.Sleep(1000);
                 }
             }
         }

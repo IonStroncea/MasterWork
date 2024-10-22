@@ -1,5 +1,6 @@
 ﻿
 using System.Net.Sockets;
+using System.Text;
 
 namespace ProxyLibrary
 {
@@ -24,14 +25,20 @@ namespace ProxyLibrary
         private TcpClient? tcpClient;
 
         /// <summary>
+        /// Caller id
+        /// </summary>
+        private string _callerId;
+
+        /// <summary>
         /// Constructor. Sets server address and proxy address
         /// </summary>
         /// <param name="serverAddress">Server address. End connection</param>
         /// <param name="serverPort">Server port. End connection</param>
-        public ProxySender(string serverAddress, int serverPort)
+        public ProxySender(string serverAddress, int serverPort, string callerId)
         {
             _serverAddress = serverAddress;
             _serverPort = serverPort;
+            _callerId = callerId;
         }
 
         /// <summary>
@@ -58,13 +65,17 @@ namespace ProxyLibrary
             if (tcpClient == null || !tcpClient.Connected)
             {
                 tcpClient = new TcpClient(_serverAddress, _serverPort);
+                NetworkStream networkStream = tcpClient.GetStream();
+                networkStream.Write(Encoding.ASCII.GetBytes(_callerId));
+                networkStream.Flush();
+                Thread.Sleep(1000);
             }
 
-            Console.WriteLine($"Send {data.Length} bytes to server {_serverAddress}:{_serverPort}");
+            //Console.WriteLine($"Send {data.Length} bytes to server {_serverAddress}:{_serverPort}");
 
             NetworkStream stream = tcpClient.GetStream();
             stream.Write(data, 0, data.Length);
-
+            stream.Flush();
             Console.WriteLine($"Succesfully sent {data.Length} bytes to server {_serverAddress}:{_serverPort}");
         }
     }

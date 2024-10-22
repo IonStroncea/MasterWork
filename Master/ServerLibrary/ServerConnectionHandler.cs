@@ -1,4 +1,5 @@
 ﻿using System.Net.Sockets;
+using System.Text;
 
 namespace ServerLibrary
 {
@@ -21,6 +22,11 @@ namespace ServerLibrary
         /// Disposed flag
         /// </summary>
         private volatile bool _disposed = false;
+
+        /// <summary>
+        /// Caller id
+        /// </summary>
+        private string _callerId = string.Empty;
 
         /// <summary>
         /// Constructor. Set tcp client to receive data
@@ -51,15 +57,30 @@ namespace ServerLibrary
             NetworkStream stream = _client.GetStream();
             if (stream.DataAvailable)
             {
-                byte[] buffer = Array.Empty<byte>();
+                if (_callerId == string.Empty)
+                {
+                    byte[] bufferString = Array.Empty<byte>();
+                    int readString = 0;
+                    while (stream.DataAvailable)
+                    {
+                        bufferString = bufferString.Concat(new byte[1024]).ToArray();
+                        readString += stream.Read(bufferString, 0, bufferString.Length);
+                    }
 
+                    bufferString = bufferString.Take(readString).ToArray();
+                    _callerId = Encoding.ASCII.GetString(bufferString);
+                    return;
+                }
+
+                byte[] buffer = Array.Empty<byte>();
+                int read = 0;
                 while (stream.DataAvailable)
                 {
                     buffer = buffer.Concat(new byte[1024]).ToArray();
-                    stream.Read(buffer, 0, buffer.Length);
+                    read+=stream.Read(buffer, 0, buffer.Length);
                 }
 
-                Console.WriteLine($"Received data from {_client.Client.LocalEndPoint} of size {buffer.Length} bytes");
+                Console.WriteLine($"Received data from {_callerId} of size {read} bytes");
             }
         }
 

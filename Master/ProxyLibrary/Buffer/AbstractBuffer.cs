@@ -46,12 +46,23 @@ namespace ProxyLibrary.Buffer
         private volatile bool _disposed = false;
 
         /// <summary>
+        /// Network stream to read
+        /// </summary>
+        private NetworkStream _stream;
+
+        /// <summary>
+        /// Caller id
+        /// </summary>
+        private string _callerId = string.Empty;
+
+        /// <summary>
         /// Constructor. Set tcp client to receive data
         /// </summary>
         /// <param name="client">Tcp client</param>
         public AbstractBuffer(TcpClient client)
         {
             _client = client;
+            _stream = _client.GetStream();
 
 
             _bufferThread = new Thread(() =>
@@ -59,7 +70,7 @@ namespace ProxyLibrary.Buffer
                 while (!_disposed)
                 {
                     ReadData();
-                    Thread.Sleep(1);
+                    Thread.Sleep(10);
                 }
             });
 
@@ -72,31 +83,34 @@ namespace ProxyLibrary.Buffer
         /// <inheritdoc/>
         public void ReadData()
         {
-            NetworkStream stream = _client.GetStream();
-
-            if (stream.DataAvailable)
+            if (_stream.DataAvailable)
             {
 
                 byte[] buffer = Array.Empty<byte>();
-
-                while (stream.DataAvailable)
+                int read = 0;
+                while (_stream.DataAvailable)
                 {
                     buffer = buffer.Concat(new byte[1024]).ToArray();
-                    stream.Read(buffer, 0, buffer.Length);
+                    read+= _stream.Read(buffer, 0, buffer.Length);
                 }
+
+                buffer = buffer.Take(read).ToArray();
 
                 if (buffer.Length > 0)
                 {
                     if (_sender == null)
                     {
                         ProxyObject message = ProxyObject.Desserialize(buffer);
-                        _sender = new ProxySender(message.NextAddress, message.NextPort);
+                        _callerId = message.CallerId;
+
+                        _sender = new ProxySender(message.NextAddress, message.NextPort, message.CallerId);
+                        
                         Console.Write($"Created sender to server {message.NextAddress} {message.NextPort}");
                     }
                     else
                     {
                         ProxyData message = new ProxyData { Data = buffer};
-                        Console.WriteLine($"Received data of size {buffer.Length} bytes");
+                        Console.WriteLine($"Received data of size {buffer.Length} bytes from {_callerId}");
                         _lastMessages.Enqueue(message);
                     }
                 }

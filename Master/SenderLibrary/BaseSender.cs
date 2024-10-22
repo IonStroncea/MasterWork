@@ -49,12 +49,13 @@ namespace SenderLibrary
 
             _client = new TcpClient(_proxyAddress, _proxyPort);
 
-            ProxyObject startMessage = new() { NextAddress = serverAddress, NextPort = serverPort};
+            ProxyObject startMessage = new() { NextAddress = serverAddress, NextPort = serverPort, CallerId = "Caller_1"};
             byte[] messageBytes = startMessage.Serialize();
 
             NetworkStream stream = _client.GetStream();
             stream.Write(messageBytes, 0, messageBytes.Length);
-
+            stream.Flush();
+            Thread.Sleep(1000);
         }
 
         /// <summary>
@@ -62,7 +63,7 @@ namespace SenderLibrary
         /// </summary>
         public void SendRandomSizeData()
         {
-            byte[] data = new byte[new Random().Next(500000)];
+            byte[] data = new byte[1024 + new Random().Next(5000)];
             SendData(data);
         }
 
@@ -89,7 +90,7 @@ namespace SenderLibrary
         {
             byte[] messageBytes = data;
 
-            Console.WriteLine($"Send {messageBytes.Length} bytes to proxy {_proxyAddress}:{_proxyPort} to server {_serverAddress}:{_serverPort}");
+            //Console.WriteLine($"Send {messageBytes.Length} bytes to proxy {_proxyAddress}:{_proxyPort} to server {_serverAddress}:{_serverPort}");
 
             NetworkStream stream = _client.GetStream();
             stream.Write(messageBytes, 0, messageBytes.Length);

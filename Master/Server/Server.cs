@@ -48,7 +48,7 @@ namespace Server
 
                 while (elapsed <= toLive)
                 {
-                    Thread.Sleep(5);
+                    Thread.Sleep(1);
                     stopwatch.Stop();
                     elapsed = stopwatch.Elapsed;
                 }

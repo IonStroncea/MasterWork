@@ -28,8 +28,8 @@ namespace Proxy
             string bufferType = "Default";
             string handlerType = "";
             int port = 10000;
-            int packetSize = 500000;
-            int tokensPerTurn = 5000000;
+            int packetSize = 1000;
+            int tokensPerTurn = 5;
             int timeToWait = 300;
 
             int ttl = -1;
@@ -105,7 +105,7 @@ namespace Proxy
 
                 while (elapsed <= toLive)
                 {
-                    Thread.Sleep(5);
+                    Thread.Sleep(1);
                     stopwatch.Stop();
                     elapsed = stopwatch.Elapsed;
                 }

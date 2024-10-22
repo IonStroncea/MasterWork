@@ -20,6 +20,11 @@ namespace Common
         public int NextPort;
 
         /// <summary>
+        /// Caller/sender id
+        /// </summary>
+        public string CallerId;
+
+        /// <summary>
         /// Serialize object
         /// </summary>
         /// <returns></returns>
@@ -30,6 +35,7 @@ namespace Common
                 using (BinaryWriter writer = new BinaryWriter(m))
                 {
                     writer.Write(NextAddress);
+                    writer.Write(CallerId);
                     writer.Write(NextPort);
                 }
                 return m.ToArray();
@@ -49,6 +55,7 @@ namespace Common
                 using (BinaryReader reader = new BinaryReader(m))
                 {
                     result.NextAddress = reader.ReadString();
+                    result.CallerId = reader.ReadString();
                     result.NextPort = reader.ReadInt32();
                 }
             }
