@@ -30,6 +30,7 @@ namespace UssageMetter
             PC.CategoryName = "Process";
             PC.CounterName = "Working Set - Private";
             PC.InstanceName = proc.ProcessName;
+            PerformanceCounter myAppCpu = new PerformanceCounter("Process", "% Processor Time", proc.ProcessName, true);
 
             bool work = true;
             Thread thread = new Thread(() => 
@@ -37,7 +38,9 @@ namespace UssageMetter
                 while (work)
                 {
                     memsize = Convert.ToInt32(PC.NextValue()) / (int)(1024);
+                    double pct = myAppCpu.NextValue();
                     Console.WriteLine($"Process use : {memsize} Kb");
+                    Console.WriteLine("Process CPU % = " + pct);
                     Thread.Sleep(1000);
                 }
             });
