@@ -63,6 +63,7 @@ namespace Sender
             }
 
             BaseSender sender = new BaseSender(address, port, proxyAddress, proxyPort, name);
+            Console.WriteLine(totalDataSize);
             if (totalDataSize > -1)
             {
                 sender.SendTotalAmountOfData(dataSize, totalDataSize);

@@ -33,7 +33,7 @@ namespace UssageMetter
             PC.CounterName = "Working Set - Private";
             PC.InstanceName = proc.ProcessName;
             PerformanceCounter myAppCpu = new PerformanceCounter("Process", "% Processor Time", proc.ProcessName, true);
-            CSVWriter writer = new CSVWriter("Values");
+            CSVWriter writer = new CSVWriter("Values.csv");
 
             bool work = true;
             Thread thread = new Thread(() => 
@@ -42,8 +42,8 @@ namespace UssageMetter
                 {
                     memsize = Convert.ToInt32(PC.NextValue()) / (int)(1024);
                     double pct = myAppCpu.NextValue();
-                    Console.WriteLine($"Process use : {memsize} Kb");
-                    Console.WriteLine("Process CPU % = " + pct);
+                    //Console.WriteLine($"Process use : {memsize} Kb");
+                    //Console.WriteLine("Process CPU % = " + pct);
 
                     string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
                     writer.WriteData(timestamp, memsize.ToString(), pct.ToString());

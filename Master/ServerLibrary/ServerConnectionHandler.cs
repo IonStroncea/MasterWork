@@ -77,7 +77,7 @@ namespace ServerLibrary
                     bufferString = bufferString.Take(readString).ToArray();
                     _callerId = Encoding.ASCII.GetString(bufferString);
 
-                    _writer = new CSVWriter(_callerId);
+                    _writer = new CSVWriter($"Server{_callerId}.csv");
                     return;
                 }
 
@@ -93,6 +93,7 @@ namespace ServerLibrary
                 {
                     string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
                     _writer.WriteData(timestamp,read.ToString());
+                    //Console.WriteLine($"Received {read}bytes of data from {_callerId}");
                 }
             }
         }

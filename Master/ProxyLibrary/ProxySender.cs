@@ -76,7 +76,7 @@ namespace ProxyLibrary
             NetworkStream stream = tcpClient.GetStream();
             stream.Write(data, 0, data.Length);
             stream.Flush();
-            Console.WriteLine($"Succesfully sent {data.Length} bytes to server {_serverAddress}:{_serverPort}");
+            //Console.WriteLine($"Succesfully sent {data.Length} bytes to server {_serverAddress}:{_serverPort}");
         }
     }
 }

@@ -40,6 +40,11 @@ namespace SenderLibrary
         private string _name;
 
         /// <summary>
+        /// Stream
+        /// </summary>
+        private NetworkStream _stream;
+
+        /// <summary>
         /// CSV writer
         /// </summary>
         private CSVWriter _writer;
@@ -59,16 +64,16 @@ namespace SenderLibrary
             _proxyAddress = proxyAddress;
             _proxyPort = proxyPort;
             _name = name;
-            _writer = new CSVWriter(_name);
+            _writer = new CSVWriter($"Sender{_name}.csv");
 
             _client = new TcpClient(_proxyAddress, _proxyPort);
 
             ProxyObject startMessage = new() { NextAddress = serverAddress, NextPort = serverPort, CallerId = _name };
             byte[] messageBytes = startMessage.Serialize();
 
-            NetworkStream stream = _client.GetStream();
-            stream.Write(messageBytes, 0, messageBytes.Length);
-            stream.Flush();
+            _stream = _client.GetStream();
+            _stream.Write(messageBytes, 0, messageBytes.Length);
+            _stream.Flush();
             Thread.Sleep(1000);
         }
 
@@ -89,14 +94,21 @@ namespace SenderLibrary
         public void SendTotalAmountOfData(int dataSize, int totalData)
         {
             int sentdata = 0;
+            int i = 0;
 
             while (sentdata < totalData)
             {
+                i++;
                 sentdata += dataSize;
                 SendSpecificSizeData(dataSize);
-
+                if (i % 100 == 0)
+                {
+                    Console.WriteLine($"Sent {sentdata}/{totalData} to {_serverAddress}:{_serverPort}");
+                }
                 Thread.Sleep(5);
             }
+
+            Console.WriteLine($"Successfully sent all data to {_serverAddress}:{_serverPort}");
         }
 
         /// <summary>
@@ -125,14 +137,15 @@ namespace SenderLibrary
 
             //Console.WriteLine($"Send {messageBytes.Length} bytes to proxy {_proxyAddress}:{_proxyPort} to server {_serverAddress}:{_serverPort}");
 
-            NetworkStream stream = _client.GetStream();
-            stream.Write(messageBytes, 0, messageBytes.Length);
+            _stream = _client.GetStream();
+            _stream.Write(messageBytes, 0, messageBytes.Length);
+            _stream.Flush();
 
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
             _writer.WriteData(timestamp, messageBytes.Length.ToString());
             
 
-            Console.WriteLine($"Successfully sent {messageBytes.Length} bytes to proxy {_proxyAddress}:{_proxyPort} to server {_serverAddress}:{_serverPort}");
+            //Console.WriteLine($"Successfully sent {messageBytes.Length} bytes to proxy {_proxyAddress}:{_proxyPort} to server {_serverAddress}:{_serverPort}");
         }
     }
 }

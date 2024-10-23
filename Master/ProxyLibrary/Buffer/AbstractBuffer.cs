@@ -110,7 +110,7 @@ namespace ProxyLibrary.Buffer
                     else
                     {
                         ProxyData message = new ProxyData { Data = buffer};
-                        Console.WriteLine($"Received data of size {buffer.Length} bytes from {_callerId}");
+                        //Console.WriteLine($"Received data of size {buffer.Length} bytes from {_callerId}");
                         _lastMessages.Enqueue(message);
                     }
                 }
