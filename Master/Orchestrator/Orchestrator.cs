@@ -21,6 +21,7 @@ namespace Orchestrator
         /// -handler handler type.RegularHandler(default) or SimultaniousHandler
         /// -tokens tokens per turn
         /// -wait wait time
+        /// -proxies nr of proxies
         /// </param>
         public static void Main(string[] args)
         {
@@ -30,6 +31,7 @@ namespace Orchestrator
             int tokensPerTurn = 5;
             int timeToWait = 300;
             int end = 1;
+            int proxies = 0;
 
             if (args.ToList().Contains("-end"))
             {
@@ -60,6 +62,10 @@ namespace Orchestrator
             {
                 timeToWait = int.Parse(args[args.ToList().IndexOf("-wait") + 1]);
             }
+            if (args.ToList().Contains("-proxies"))
+            {
+                proxies = int.Parse(args[args.ToList().IndexOf("-proxies") + 1]);
+            }
 
             List<Process> servers = new();
             List<Process> senders = new();
@@ -80,21 +86,39 @@ namespace Orchestrator
             {
                 Process sender = new Process();
                 sender.StartInfo.FileName = "Sender.exe";
-                sender.StartInfo.Arguments = $"/c -p {serverPort + i} -total {5000000} -size {1024*(1 + i*10)} -n {i+1}";
+                string proxiesString= "";
+
+                for (int j = 0; j < proxies; j++)
+                {
+                    proxiesString += $" 127.0.0.1 {10000 + j * 100}";
+                }
+
+                sender.StartInfo.Arguments = $"/c -p {serverPort + i} -total {5000000} -size {1024 * (1 + i * 10)} -n {i + 1} -nrOfProxies {proxies} -proxies{proxiesString}";
+
 
                 senders.Add(sender);
             }
 
-            Process proxy = new();
-            proxy.StartInfo.FileName = "Proxy.exe";
-            proxy.StartInfo.Arguments = $"/c -buffer {bufferType} -size {packetSize} -handler {handlerType} -tokens {tokensPerTurn} -wait {timeToWait}";
+            List<Process> proxiesList = new();
+
+            for (int i = 0; i < proxies; i++)
+            {
+                Process proxy = new();
+                proxy.StartInfo.FileName = "Proxy.exe";
+                proxy.StartInfo.Arguments = $"/c -buffer {bufferType} -size {packetSize} -handler {handlerType} -tokens {tokensPerTurn} -wait {timeToWait} -p {10000 + i * 100}";
+                proxiesList.Add(proxy);
+            }
 
             Process ussageMetter = new();
             ussageMetter.StartInfo.FileName = "UssageMetter.exe";
 
 
-            ussageMetter.Start();
-            proxy.Start();
+            //ussageMetter.Start();
+
+            proxiesList.ForEach(proxy =>
+            {
+                proxy.Start();
+            });
             servers.ForEach(server => server.Start());
 
             Thread.Sleep(2000);
@@ -109,14 +133,17 @@ namespace Orchestrator
                 sender.WaitForExit();
                 sender.Dispose();
             });
-
+/*
             ussageMetter.Kill();
             ussageMetter.WaitForExit();
-            ussageMetter.Dispose();
+            ussageMetter.Dispose();*/
 
-            proxy.Kill();
-            proxy.WaitForExit();
-            proxy.Dispose();
+            proxiesList.ForEach(proxy =>
+            {
+                proxy.Kill();
+                proxy.WaitForExit();
+                proxy.Dispose();
+            });
 
             servers.ForEach(server =>
             {

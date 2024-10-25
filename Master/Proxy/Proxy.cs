@@ -92,7 +92,8 @@ namespace Proxy
 
             ProxyReceiver proxy = new ProxyReceiver(address, port, bufferEnum, packetSize, handler);
             proxy.Start();
-            
+
+            Console.WriteLine($"Started proxy at {address}:{port}");
 
             if (ttl > -1)
             {

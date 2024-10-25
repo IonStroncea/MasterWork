@@ -1,4 +1,5 @@
 ﻿
+using Common;
 using System.Net.Sockets;
 using System.Text;
 
@@ -30,15 +31,20 @@ namespace ProxyLibrary
         private string _callerId;
 
         /// <summary>
+        /// Object with info for next proxies
+        /// </summary>
+        private ProxyObject _proxyObject;
+
+        /// <summary>
         /// Constructor. Sets server address and proxy address
         /// </summary>
-        /// <param name="serverAddress">Server address. End connection</param>
-        /// <param name="serverPort">Server port. End connection</param>
-        public ProxySender(string serverAddress, int serverPort, string callerId)
+        /// <param name="proxyObject">Proxy object</param>
+        public ProxySender(ProxyObject proxyObject)
         {
-            _serverAddress = serverAddress;
-            _serverPort = serverPort;
-            _callerId = callerId;
+            _serverAddress = proxyObject.NextAddress;
+            _serverPort = proxyObject.NextPort;
+            _callerId = proxyObject.CallerId;
+            _proxyObject = proxyObject;
         }
 
         /// <summary>
@@ -66,8 +72,25 @@ namespace ProxyLibrary
             {
                 tcpClient = new TcpClient(_serverAddress, _serverPort);
                 NetworkStream networkStream = tcpClient.GetStream();
-                networkStream.Write(Encoding.ASCII.GetBytes(_callerId));
-                networkStream.Flush();
+                if (_proxyObject.NrOfNextProxies == 0)
+                {
+                    networkStream.Write(Encoding.ASCII.GetBytes(_callerId));
+                    networkStream.Flush();
+                }
+                else 
+                {
+                    ProxyObject proxyObject = new ProxyObject 
+                    { 
+                        NextAddress = _proxyObject.NextEndPoints[0].NextAddress,
+                        NextPort = _proxyObject.NextEndPoints[0].NextPort,
+                        CallerId = _proxyObject.CallerId,
+                        NrOfNextProxies = _proxyObject.NrOfNextProxies-1,
+                        NextEndPoints = _proxyObject.NextEndPoints.Skip(1).ToList()
+                    };
+
+                    networkStream.Write(proxyObject.Serialize());
+                    networkStream.Flush();
+                }
                 Thread.Sleep(1000);
             }
 

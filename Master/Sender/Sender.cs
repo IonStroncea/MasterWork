@@ -1,4 +1,5 @@
-﻿using SenderLibrary;
+﻿using Common;
+using SenderLibrary;
 using System.Diagnostics;
 
 namespace Sender
@@ -11,25 +12,56 @@ namespace Sender
         /// <summary>
         /// Main program
         /// </summary>
-        /// <param name="args">Arguments -f address of server -p port of server -fp proxy address -pp proxy port -t time to live in seconds -n name -total totalDataSize
-        /// -size dataSize</param>
+        /// <param name="args">Arguments:
+        /// -f address of server 
+        /// -p port of server 
+        /// -t time to live in seconds 
+        /// -n name 
+        /// -total totalDataSize
+        /// -size dataSize
+        /// -nrOfProxies number of proxies after first
+        /// -proxies list of proxies addresses and ports
+        /// </param>
         public static void Main(string[] args)
         {
             string address = "127.0.0.1";
             int port = 9000;
             string name = "Sender";
 
-            string proxyAddress = "127.0.0.1";
-            int proxyPort = 10000;
-
             int ttl = -1;
             int totalDataSize = -1;
             int dataSize = 1024;
+            int nrOfProxies = 1;
+            List<ProxyInfo> nextProxies =
+            [
+                new ProxyInfo
+                {
+                    NextAddress = "127.0.0.1",
+                    NextPort = 10000,
+                }
+            ];
 
 
             if (args.ToList().Contains("-f"))
             {
                 address = args[args.ToList().IndexOf("-f") + 1];
+            }
+            if (args.ToList().Contains("-nrOfProxies"))
+            {
+                nrOfProxies = int.Parse(args[args.ToList().IndexOf("-nrOfProxies") + 1]);
+            }
+            if (args.ToList().Contains("-proxies"))
+            {
+                nextProxies = new();
+                int pointer = args.ToList().IndexOf("-proxies");
+                for (int i = 0; i < nrOfProxies; i++)
+                {
+                    nextProxies.Add(new ProxyInfo
+                    {                       
+                        NextAddress = args[pointer + i*2 + 1],
+                        NextPort = int.Parse(args[pointer + i * 2 + 2])
+                    });
+                }
             }
             if (args.ToList().Contains("-p"))
             {
@@ -38,15 +70,6 @@ namespace Sender
             if (args.ToList().Contains("-n"))
             {
                 name = args[args.ToList().IndexOf("-n") + 1];
-            }
-
-            if (args.ToList().Contains("-fp"))
-            {
-                proxyAddress = args[args.ToList().IndexOf("-fp") + 1];
-            }
-            if (args.ToList().Contains("-pp"))
-            {
-                proxyPort = int.Parse(args[args.ToList().IndexOf("-pp") + 1]);
             }
 
             if (args.ToList().Contains("-t"))
@@ -62,8 +85,8 @@ namespace Sender
                 dataSize = int.Parse(args[args.ToList().IndexOf("-size") + 1]);
             }
 
-            BaseSender sender = new BaseSender(address, port, proxyAddress, proxyPort, name);
-            Console.WriteLine(totalDataSize);
+            BaseSender sender = new BaseSender(address, port, name, nextProxies);
+
             if (totalDataSize > -1)
             {
                 sender.SendTotalAmountOfData(dataSize, totalDataSize);

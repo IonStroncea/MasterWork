@@ -1,6 +1,7 @@
 ﻿using Common;
 using System.Globalization;
 using System.Net.Sockets;
+using System.Text;
 
 namespace SenderLibrary
 {
@@ -18,16 +19,6 @@ namespace SenderLibrary
         /// End server port
         /// </summary>
         private int _serverPort;
-
-        /// <summary>
-        /// Proxy address
-        /// </summary>
-        private string _proxyAddress = string.Empty;
-
-        /// <summary>
-        /// Proxy port
-        /// </summary>
-        private int _proxyPort;
 
         /// <summary>
         /// Tcp client
@@ -57,23 +48,43 @@ namespace SenderLibrary
         /// <param name="proxyAddress">Proxy address. Intermediate connection</param>
         /// <param name="proxyPort">Proxy address. Intermediate connectio</param>
         /// <param name="name">Name of sender</param>
-        public BaseSender(string serverAddress, int serverPort, string proxyAddress, int proxyPort, string name)
+        public BaseSender(string serverAddress, int serverPort, string name, List<ProxyInfo> proxyInfos)
         {
             _serverAddress = serverAddress;
             _serverPort = serverPort;
-            _proxyAddress = proxyAddress;
-            _proxyPort = proxyPort;
             _name = name;
             _writer = new CSVWriter($"Sender{_name}.csv");
 
-            _client = new TcpClient(_proxyAddress, _proxyPort);
+            if (proxyInfos.Count == 0)
+            {
+                _client = new TcpClient(serverAddress, serverPort);
+                _stream = _client.GetStream();
+                _stream.Write(Encoding.ASCII.GetBytes(name));
+                _stream.Flush();
+            }
+            else
+            {
+                _client = new TcpClient(proxyInfos[0].NextAddress, proxyInfos[0].NextPort);
 
-            ProxyObject startMessage = new() { NextAddress = serverAddress, NextPort = serverPort, CallerId = _name };
-            byte[] messageBytes = startMessage.Serialize();
+                proxyInfos.Add(new ProxyInfo { NextAddress = serverAddress, NextPort = serverPort });
 
-            _stream = _client.GetStream();
-            _stream.Write(messageBytes, 0, messageBytes.Length);
-            _stream.Flush();
+                ProxyObject startMessage = new()
+                {
+                    NextAddress = proxyInfos[1].NextAddress,
+                    NextPort = proxyInfos[1].NextPort,
+                    CallerId = _name,
+                    NextEndPoints = proxyInfos.Skip(2).ToList(),
+                    NrOfNextProxies = proxyInfos.Count - 2
+                };
+
+                byte[] messageBytes = startMessage.Serialize();
+
+                _stream = _client.GetStream();
+                _stream.Write(messageBytes, 0, messageBytes.Length);
+                _stream.Flush();
+            }
+
+            
             Thread.Sleep(1000);
         }
 

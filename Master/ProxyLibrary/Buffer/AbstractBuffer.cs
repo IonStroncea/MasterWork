@@ -103,9 +103,9 @@ namespace ProxyLibrary.Buffer
                         ProxyObject message = ProxyObject.Desserialize(buffer);
                         _callerId = message.CallerId;
 
-                        _sender = new ProxySender(message.NextAddress, message.NextPort, message.CallerId);
+                        _sender = new ProxySender(message);
                         
-                        Console.Write($"Created sender to server {message.NextAddress} {message.NextPort}");
+                        Console.WriteLine($"Created sender to server {message.NextAddress} {message.NextPort}");
                     }
                     else
                     {
