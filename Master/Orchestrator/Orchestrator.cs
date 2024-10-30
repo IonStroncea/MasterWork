@@ -31,7 +31,7 @@ namespace Orchestrator
             int tokensPerTurn = 5;
             int timeToWait = 300;
             int end = 1;
-            int proxies = 0;
+            int proxies = 2;
 
             if (args.ToList().Contains("-end"))
             {
@@ -109,16 +109,17 @@ namespace Orchestrator
                 proxiesList.Add(proxy);
             }
 
-            Process ussageMetter = new();
-            ussageMetter.StartInfo.FileName = "UssageMetter.exe";
-
-
-            //ussageMetter.Start();
-
             proxiesList.ForEach(proxy =>
             {
                 proxy.Start();
             });
+
+            Process ussageMetter = new();
+            ussageMetter.StartInfo.FileName = "UssageMetter.exe";
+
+
+            ussageMetter.Start();
+
             servers.ForEach(server => server.Start());
 
             Thread.Sleep(2000);
@@ -133,10 +134,10 @@ namespace Orchestrator
                 sender.WaitForExit();
                 sender.Dispose();
             });
-/*
+
             ussageMetter.Kill();
             ussageMetter.WaitForExit();
-            ussageMetter.Dispose();*/
+            ussageMetter.Dispose();
 
             proxiesList.ForEach(proxy =>
             {

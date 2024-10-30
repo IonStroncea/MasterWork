@@ -1,4 +1,5 @@
 ﻿using Common;
+using System;
 using System.Diagnostics;
 using System.Globalization;
 
@@ -25,28 +26,52 @@ namespace UssageMetter
                 Thread.Sleep(500);
             }
 
-            
-            Process proc = processes[0];
-            int memsize = 0; // memsize in KB
-            PerformanceCounter PC = new PerformanceCounter();
-            PC.CategoryName = "Process";
-            PC.CounterName = "Working Set - Private";
-            PC.InstanceName = proc.ProcessName;
-            PerformanceCounter myAppCpu = new PerformanceCounter("Process", "% Processor Time", proc.ProcessName, true);
             CSVWriter writer = new CSVWriter("Values.csv");
+
+            List<PerformanceCounter> memoryCounters = new();
+            List<PerformanceCounter> cpuCounters = new();
+
+            for(int i = 0; i <processes.Length; i++)
+            { 
+                Process process = processes[i];
+                int memsize = 0; // memsize in KB
+                PerformanceCounter ram = new PerformanceCounter();
+
+                ram.CategoryName = "Process";
+                ram.CounterName = "Working Set - Private";
+                ram.InstanceName = i == 0 ? process.ProcessName : process.ProcessName + $"#{i}";
+                ram.ReadOnly = true;
+                
+                memoryCounters.Add(ram);
+
+                PerformanceCounter cpu = new PerformanceCounter("Process", "% Processor Time",
+                    i == 0 ? process.ProcessName : process.ProcessName + $"#{i}", true);
+                cpuCounters.Add(cpu);
+                
+            };
 
             bool work = true;
             Thread thread = new Thread(() => 
             {
                 while (work)
                 {
-                    memsize = Convert.ToInt32(PC.NextValue()) / (int)(1024);
-                    double pct = myAppCpu.NextValue();
+                    double memUsage = 0;
+                    memoryCounters.ForEach(memory => 
+                    {
+                        memUsage += memory.NextValue();
+                    });
+
+                    double cpuUsage = 0.0d;
+                    cpuCounters.ForEach(cpu =>
+                    {
+                        cpuUsage += cpu.NextValue();
+
+                    });
                     //Console.WriteLine($"Process use : {memsize} Kb");
                     //Console.WriteLine("Process CPU % = " + pct);
 
                     string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
-                    writer.WriteData(timestamp, memsize.ToString(), pct.ToString());
+                    writer.WriteData(timestamp, ((int)(memUsage / 1024)).ToString(), cpuUsage.ToString());
                     
                     Thread.Sleep(1000);
                 }
@@ -58,8 +83,17 @@ namespace UssageMetter
             work = false;
             thread.Join();
 
-            PC.Close();
-            PC.Dispose();
+            memoryCounters.ForEach(counter => 
+            {
+                counter.Close();
+                counter.Dispose();
+            });
+
+            cpuCounters.ForEach(counter =>
+            {
+                counter.Close();
+                counter.Dispose();
+            });
         }
     }
 }
