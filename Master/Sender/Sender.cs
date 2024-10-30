@@ -86,6 +86,7 @@ namespace Sender
             }
 
             BaseSender sender = new BaseSender(address, port, name, nextProxies);
+            Console.WriteLine($"Created sender to {address}:{port}");
 
             if (totalDataSize > -1)
             {

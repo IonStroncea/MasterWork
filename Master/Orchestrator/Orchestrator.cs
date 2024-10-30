@@ -22,6 +22,7 @@ namespace Orchestrator
         /// -tokens tokens per turn
         /// -wait wait time
         /// -proxies nr of proxies
+        /// -multiplySenders how many senders for one server
         /// </param>
         public static void Main(string[] args)
         {
@@ -31,11 +32,16 @@ namespace Orchestrator
             int tokensPerTurn = 5;
             int timeToWait = 300;
             int end = 1;
-            int proxies = 2;
+            int multiplySenders = 2;
+            int proxies = 1;
 
             if (args.ToList().Contains("-end"))
             {
                 end = int.Parse(args[args.ToList().IndexOf("-end") + 1]);
+            }
+            if (args.ToList().Contains("-multiplySenders"))
+            {
+                multiplySenders = int.Parse(args[args.ToList().IndexOf("-multiplySenders") + 1]);
             }
 
             if (args.ToList().Contains("-buffer"))
@@ -82,7 +88,7 @@ namespace Orchestrator
                 servers.Add(server);
             }
 
-            for (int i = 0; i < end; i++)
+            for (int i = 0; i < multiplySenders * end; i++)
             {
                 Process sender = new Process();
                 sender.StartInfo.FileName = "Sender.exe";
@@ -93,7 +99,7 @@ namespace Orchestrator
                     proxiesString += $" 127.0.0.1 {10000 + j * 100}";
                 }
 
-                sender.StartInfo.Arguments = $"/c -p {serverPort + i} -total {5000000} -size {1024 * (1 + i * 10)} -n {i + 1} -nrOfProxies {proxies} -proxies{proxiesString}";
+                sender.StartInfo.Arguments = $"/c -p {serverPort + ((int)(i/multiplySenders))} -total {5000000} -size {1024 * (1 + i * 10)} -n {i + 1} -nrOfProxies {proxies} -proxies{proxiesString}";
 
 
                 senders.Add(sender);

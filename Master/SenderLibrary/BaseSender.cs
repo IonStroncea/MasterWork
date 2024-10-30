@@ -114,12 +114,12 @@ namespace SenderLibrary
                 SendSpecificSizeData(dataSize);
                 if (i % 100 == 0)
                 {
-                    Console.WriteLine($"Sent {sentdata}/{totalData} to {_serverAddress}:{_serverPort}");
+                    Console.WriteLine($"{_name} sent {sentdata}/{totalData} to {_serverAddress}:{_serverPort}");
                 }
                 Thread.Sleep(5);
             }
 
-            Console.WriteLine($"Successfully sent all data to {_serverAddress}:{_serverPort}");
+            Console.WriteLine($"{_name} successfully sent all data to {_serverAddress}:{_serverPort}");
         }
 
         /// <summary>
