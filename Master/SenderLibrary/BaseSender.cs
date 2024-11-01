@@ -65,8 +65,9 @@ namespace SenderLibrary
             else
             {
                 _client = new TcpClient(proxyInfos[0].NextAddress, proxyInfos[0].NextPort);
-
                 proxyInfos.Add(new ProxyInfo { NextAddress = serverAddress, NextPort = serverPort });
+
+                proxyInfos = EncryptListOfProxies(proxyInfos);
 
                 ProxyObject startMessage = new()
                 {
@@ -86,6 +87,16 @@ namespace SenderLibrary
 
             
             Thread.Sleep(1000);
+        }
+
+        /// <summary>
+        /// Encrypts proxy infos
+        /// </summary>
+        /// <param name="proxyInfos">List of proxy infos</param>
+        /// <returns>Encrypted list</returns>
+        protected virtual List<ProxyInfo> EncryptListOfProxies(List<ProxyInfo> proxyInfos)
+        {
+            return proxyInfos;
         }
 
         /// <summary>

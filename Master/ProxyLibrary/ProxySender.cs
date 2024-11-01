@@ -36,15 +36,33 @@ namespace ProxyLibrary
         private ProxyObject _proxyObject;
 
         /// <summary>
+        /// App id
+        /// </summary>
+        protected string _appId;
+
+        /// <summary>
         /// Constructor. Sets server address and proxy address
         /// </summary>
         /// <param name="proxyObject">Proxy object</param>
-        public ProxySender(ProxyObject proxyObject)
+        /// <param name="id">app id</param>
+        public ProxySender(ProxyObject proxyObject, string id)
         {
+            _appId = id;
+            proxyObject = DecryptProxyObject(proxyObject);
             _serverAddress = proxyObject.NextAddress;
             _serverPort = proxyObject.NextPort;
             _callerId = proxyObject.CallerId;
             _proxyObject = proxyObject;
+        }
+
+        /// <summary>
+        /// Decrypts proxy object
+        /// </summary>
+        /// <param name="message">Message to decrypt</param>
+        /// <returns>Decrypted message</returns>
+        protected virtual ProxyObject DecryptProxyObject(ProxyObject message)
+        {
+            return message;
         }
 
         /// <summary>

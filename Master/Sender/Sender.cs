@@ -85,7 +85,8 @@ namespace Sender
                 dataSize = int.Parse(args[args.ToList().IndexOf("-size") + 1]);
             }
 
-            BaseSender sender = new BaseSender(address, port, name, nextProxies);
+            //BaseSender sender = new BaseSender(address, port, name, nextProxies);
+            BaseSender sender = new EncryptionBaseSender(address, port, name, nextProxies);
             Console.WriteLine($"Created sender to {address}:{port}");
 
             if (totalDataSize > -1)

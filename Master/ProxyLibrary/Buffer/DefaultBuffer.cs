@@ -9,9 +9,10 @@ namespace ProxyLibrary.Buffer
     public class DefaultBuffer : AbstractBuffer
     {
         /// <inheritdoc/>
-        public DefaultBuffer(TcpClient client) : base(client)
+        public DefaultBuffer(TcpClient client, string id) : base(client, id)
         {
         }
+
 
         /// <inheritdoc/>
         public override List<ProxyData> PrepareData()

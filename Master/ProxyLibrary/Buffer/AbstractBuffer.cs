@@ -56,13 +56,20 @@ namespace ProxyLibrary.Buffer
         private string _callerId = string.Empty;
 
         /// <summary>
+        /// App id
+        /// </summary>
+        protected string _appId;
+
+        /// <summary>
         /// Constructor. Set tcp client to receive data
         /// </summary>
         /// <param name="client">Tcp client</param>
-        public AbstractBuffer(TcpClient client)
+        /// <param name="id">app id</param>
+        public AbstractBuffer(TcpClient client, string id)
         {
             _client = client;
             _stream = _client.GetStream();
+            _appId = id;
 
 
             _bufferThread = new Thread(() =>
@@ -103,7 +110,8 @@ namespace ProxyLibrary.Buffer
                         ProxyObject message = ProxyObject.Desserialize(buffer);
                         _callerId = message.CallerId;
 
-                        _sender = new ProxySender(message);
+                        //_sender = new ProxySender(message, _appId);
+                        _sender = new EncryptionProxySender(message, _appId);
                         
                         Console.WriteLine($"Created sender to server {message.NextAddress} {message.NextPort}");
                     }

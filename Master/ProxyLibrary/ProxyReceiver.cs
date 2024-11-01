@@ -118,11 +118,11 @@ namespace ProxyLibrary
 
                 if (_bufferType == BufferEnum.SameSize)
                 {
-                    _handler.AddBuffer(new SameSizeBuffer(client, _packetSize));
+                    _handler.AddBuffer(new SameSizeBuffer(client, _packetSize, _port.ToString()));
                 }
                 else
                 {
-                    _handler.AddBuffer(new DefaultBuffer(client));
+                    _handler.AddBuffer(new DefaultBuffer(client, _port.ToString()));
                 }
             }
         }

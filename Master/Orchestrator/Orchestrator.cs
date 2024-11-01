@@ -32,8 +32,8 @@ namespace Orchestrator
             int tokensPerTurn = 5;
             int timeToWait = 300;
             int end = 1;
-            int multiplySenders = 2;
-            int proxies = 1;
+            int multiplySenders = 1;
+            int proxies = 3;
 
             if (args.ToList().Contains("-end"))
             {
