@@ -39,14 +39,21 @@ namespace ServerLibrary
         private volatile bool _disposed = false;
 
         /// <summary>
+        /// Flag if to send back values
+        /// </summary>
+        private bool _returnValues;
+
+        /// <summary>
         /// Constructor. Sets address and port to listen to
         /// </summary>
-        /// <param name="address"></param>
-        /// <param name="port"></param>
-        public BaseServer(string address, int port)
+        /// <param name="address">Address to run</param>
+        /// <param name="port">Port</param>
+        /// <param name="returnValues">True if send back balues</param>
+        public BaseServer(string address, int port, bool returnValues)
         {
             _address = address;
             _port = port;
+            _returnValues = returnValues;
         }
 
         /// <summary>
@@ -105,7 +112,7 @@ namespace ServerLibrary
             {
                 TcpClient client = _server.AcceptTcpClient();
 
-                _handlers.Add(new ServerConnectionHandler(client));
+                _handlers.Add(_returnValues ? new ServerConnectionHandlerWithReturn(client) : new ServerConnectionHandler(client));
                 Console.WriteLine($"Client connected");
             }
         }

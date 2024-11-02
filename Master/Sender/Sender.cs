@@ -21,6 +21,7 @@ namespace Sender
         /// -size dataSize
         /// -nrOfProxies number of proxies after first
         /// -proxies list of proxies addresses and ports
+        /// -return if return values
         /// </param>
         public static void Main(string[] args)
         {
@@ -32,6 +33,8 @@ namespace Sender
             int totalDataSize = -1;
             int dataSize = 1024;
             int nrOfProxies = 1;
+            bool returnValues = false;
+
             List<ProxyInfo> nextProxies =
             [
                 new ProxyInfo
@@ -41,7 +44,10 @@ namespace Sender
                 }
             ];
 
-
+            if (args.ToList().Contains("-return"))
+            {
+                returnValues = true;
+            }
             if (args.ToList().Contains("-f"))
             {
                 address = args[args.ToList().IndexOf("-f") + 1];
@@ -85,8 +91,8 @@ namespace Sender
                 dataSize = int.Parse(args[args.ToList().IndexOf("-size") + 1]);
             }
 
-            //BaseSender sender = new BaseSender(address, port, name, nextProxies);
-            BaseSender sender = new EncryptionBaseSender(address, port, name, nextProxies);
+            ISender sender = returnValues ? new SenderWithReturn(address, port, name, nextProxies) : new BaseSender(address, port, name, nextProxies);
+            //ISender sender = new EncryptionBaseSender(address, port, name, nextProxies);
             Console.WriteLine($"Created sender to {address}:{port}");
 
             if (totalDataSize > -1)

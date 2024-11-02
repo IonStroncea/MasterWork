@@ -95,7 +95,19 @@ namespace ServerLibrary
                     _writer.WriteData(timestamp,read.ToString());
                     //Console.WriteLine($"Received {read}bytes of data from {_callerId}");
                 }
+
+                SendBack(buffer, stream);
             }
+        }
+
+        /// <summary>
+        /// Send back data
+        /// </summary>
+        /// <param name="buffer">Data to send</param>
+        /// <param name="stream">Stream to send data with</param>
+        protected virtual void SendBack(byte[] buffer, NetworkStream stream)
+        {
+            return;
         }
 
         /// <summary>

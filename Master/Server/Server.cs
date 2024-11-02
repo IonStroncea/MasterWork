@@ -11,16 +11,21 @@ namespace Server
         /// <summary>
         /// Main program
         /// </summary>
-        /// <param name="args">Arguments -f address of server -p port of server -t time to live in seconds</param>
+        /// <param name="args">Arguments -f address of server -p port of server -t time to live in seconds
+        /// -return if return values
+        /// </param>
         public static void Main(string[] args)
         {
             string address = "127.0.0.1";
             int port = 9000;
-           
+            bool returnValues = false;
 
             int ttl = -1;
 
-
+            if (args.ToList().Contains("-return"))
+            {
+                returnValues = true;
+            }
             if (args.ToList().Contains("-f"))
             {
                 address = args[args.ToList().IndexOf("-f") + 1];
@@ -35,7 +40,7 @@ namespace Server
                 ttl = int.Parse(args[args.ToList().IndexOf("-t") + 1]);
             }
 
-            BaseServer server = new BaseServer(address, port);
+            BaseServer server = new BaseServer(address, port, returnValues);
             server.Start();
 
             if (ttl > -1)

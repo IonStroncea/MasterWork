@@ -8,7 +8,7 @@ namespace SenderLibrary
     /// <summary>
     /// Base sender object
     /// </summary>
-    public class BaseSender
+    public class BaseSender : ISender
     {
         /// <summary>
         /// End server address
@@ -33,12 +33,12 @@ namespace SenderLibrary
         /// <summary>
         /// Stream
         /// </summary>
-        private NetworkStream _stream;
+        protected NetworkStream _stream;
 
         /// <summary>
         /// CSV writer
         /// </summary>
-        private CSVWriter _writer;
+        protected CSVWriter _writer;
 
         /// <summary>
         /// Constructor. Sets server address and proxy address
@@ -85,7 +85,7 @@ namespace SenderLibrary
                 _stream.Flush();
             }
 
-            
+
             Thread.Sleep(1000);
         }
 
@@ -99,20 +99,14 @@ namespace SenderLibrary
             return proxyInfos;
         }
 
-        /// <summary>
-        /// Send data of random size to proxy
-        /// </summary>
+        /// <inheritdoc/>
         public void SendRandomSizeData()
         {
             byte[] data = new byte[1024 + new Random().Next(5000)];
             SendData(data);
         }
 
-        /// <summary>
-        /// Send X amount of data with packets of Y size
-        /// </summary>
-        /// <param name="dataSize">Packet size</param>
-        /// <param name="totalData">Total data</param>
+        /// <inheritdoc/>
         public void SendTotalAmountOfData(int dataSize, int totalData)
         {
             int sentdata = 0;
@@ -133,26 +127,21 @@ namespace SenderLibrary
             Console.WriteLine($"{_name} successfully sent all data to {_serverAddress}:{_serverPort}");
         }
 
-        /// <summary>
-        /// Send data of specific size to proxy
-        /// </summary>
-        /// <param name="dataSize">DataSize</param>
+        /// <inheritdoc/>
         public void SendSpecificSizeData(int dataSize)
         {
             byte[] data = new byte[dataSize];
             SendData(data);
         }
 
+        /// <inheritdoc/>
         public void Stop()
         {
             _client.Close();
             _writer.Close();
         }
 
-        /// <summary>
-        /// Send data to proxy
-        /// </summary>
-        /// <param name="data">Data</param>
+        /// <inheritdoc/>
         public void SendData(byte[] data)
         {
             byte[] messageBytes = data;
@@ -164,10 +153,21 @@ namespace SenderLibrary
             _stream.Flush();
 
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
-            _writer.WriteData(timestamp, messageBytes.Length.ToString());
-            
+            _writer.WriteData(timestamp, messageBytes.Length.ToString() , "send");
+
+
+            WaitResponse(messageBytes.Length);
 
             //Console.WriteLine($"Successfully sent {messageBytes.Length} bytes to proxy {_proxyAddress}:{_proxyPort} to server {_serverAddress}:{_serverPort}");
+        }
+
+        /// <summary>
+        /// Wait for response
+        /// </summary>
+        /// <param name="messageLength">Message length</param>
+        protected virtual void WaitResponse(int messageLength)
+        {
+            return;
         }
     }
 }
