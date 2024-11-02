@@ -27,8 +27,9 @@ namespace SenderLibrary
                     int read = 0;
                     while (_stream.DataAvailable)
                     {
-                        buffer = buffer.Concat(new byte[1024]).ToArray();
-                        read += _stream.Read(buffer, 0, buffer.Length);
+                        byte[] buffer2 = new byte[1024];
+                        read += _stream.Read(buffer2, 0, 1024);
+                        buffer = buffer.Concat(buffer2).ToArray();
                     }
 
                     buffer = buffer.Take(read).ToArray();
@@ -38,6 +39,7 @@ namespace SenderLibrary
                         string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
                         _writer.WriteData(timestamp, buffer.Length.ToString(), "returned");
                         waitRead = false;
+                        Console.WriteLine($"Received back data {buffer.Length}");
                     }
 
                     Thread.Sleep(2);

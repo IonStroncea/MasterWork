@@ -19,6 +19,8 @@ namespace ServerLibrary
         {
             stream.Write(buffer, 0, buffer.Length);
             stream.Flush();
+
+            Console.WriteLine($"Sent back data {buffer.Length}");
         }
     }
 }

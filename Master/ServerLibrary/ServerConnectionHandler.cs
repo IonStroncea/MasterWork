@@ -1,5 +1,6 @@
 ﻿using Common;
 using System.Globalization;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 
@@ -70,8 +71,9 @@ namespace ServerLibrary
                     int readString = 0;
                     while (stream.DataAvailable)
                     {
-                        bufferString = bufferString.Concat(new byte[1024]).ToArray();
-                        readString += stream.Read(bufferString, 0, bufferString.Length);
+                        byte[] buffer2 = new byte[1024];
+                        readString += stream.Read(buffer2, 0, 1024);
+                        bufferString = bufferString.Concat(buffer2).ToArray();
                     }
 
                     bufferString = bufferString.Take(readString).ToArray();
@@ -85,8 +87,9 @@ namespace ServerLibrary
                 int read = 0;
                 while (stream.DataAvailable)
                 {
-                    buffer = buffer.Concat(new byte[1024]).ToArray();
-                    read+=stream.Read(buffer, 0, buffer.Length);
+                    byte[] buffer2 = new byte[1024];
+                    read += stream.Read(buffer2, 0, 1024);
+                    buffer = buffer.Concat(buffer2).ToArray();
                 }
 
                 if (_writer != null)

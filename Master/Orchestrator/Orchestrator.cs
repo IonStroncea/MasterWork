@@ -23,6 +23,7 @@ namespace Orchestrator
         /// -wait wait time
         /// -proxies nr of proxies
         /// -multiplySenders how many senders for one server
+        /// -return if return values
         /// </param>
         public static void Main(string[] args)
         {
@@ -35,9 +36,16 @@ namespace Orchestrator
             int multiplySenders = 1;
             int proxies = 3;
 
+            bool returnValues = true;
+
             if (args.ToList().Contains("-end"))
             {
                 end = int.Parse(args[args.ToList().IndexOf("-end") + 1]);
+            }
+
+            if (args.ToList().Contains("-return"))
+            {
+                returnValues = true;
             }
             if (args.ToList().Contains("-multiplySenders"))
             {
@@ -78,12 +86,13 @@ namespace Orchestrator
 
             int serverPort = 9000;
             string address = "127.0.0.1";
+            string returnValuesString = returnValues ? "-return" : "";
 
             for (int i = 0; i < end; i++)
-            {
+            {              
                 Process server = new Process();
                 server.StartInfo.FileName = "Server.exe";
-                server.StartInfo.Arguments = $"/c -f {address} -p {serverPort + i}";
+                server.StartInfo.Arguments = $"/c -f {address} -p {serverPort + i} {returnValuesString}";
 
                 servers.Add(server);
             }
@@ -99,7 +108,7 @@ namespace Orchestrator
                     proxiesString += $" 127.0.0.1 {10000 + j * 100}";
                 }
 
-                sender.StartInfo.Arguments = $"/c -p {serverPort + ((int)(i/multiplySenders))} -total {5000000} -size {1024 * (1 + i * 10)} -n {i + 1} -nrOfProxies {proxies} -proxies{proxiesString}";
+                sender.StartInfo.Arguments = $"/c {returnValuesString} -p {serverPort + ((int)(i/multiplySenders))} -total {5000000} -size {1024 * (1 + i * 10)} -n {i + 1} -nrOfProxies {proxies} -proxies{proxiesString}";
 
 
                 senders.Add(sender);
@@ -111,7 +120,7 @@ namespace Orchestrator
             {
                 Process proxy = new();
                 proxy.StartInfo.FileName = "Proxy.exe";
-                proxy.StartInfo.Arguments = $"/c -buffer {bufferType} -size {packetSize} -handler {handlerType} -tokens {tokensPerTurn} -wait {timeToWait} -p {10000 + i * 100}";
+                proxy.StartInfo.Arguments = $"/c {returnValuesString} -buffer {bufferType} -size {packetSize} -handler {handlerType} -tokens {tokensPerTurn} -wait {timeToWait} -p {10000 + i * 100}";
                 proxiesList.Add(proxy);
             }
 

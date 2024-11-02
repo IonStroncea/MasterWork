@@ -155,10 +155,9 @@ namespace SenderLibrary
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
             _writer.WriteData(timestamp, messageBytes.Length.ToString() , "send");
 
+            Console.WriteLine($"Successfully sent {messageBytes.Length} bytes to proxy to server {_serverAddress}:{_serverPort}");
 
             WaitResponse(messageBytes.Length);
-
-            //Console.WriteLine($"Successfully sent {messageBytes.Length} bytes to proxy {_proxyAddress}:{_proxyPort} to server {_serverAddress}:{_serverPort}");
         }
 
         /// <summary>

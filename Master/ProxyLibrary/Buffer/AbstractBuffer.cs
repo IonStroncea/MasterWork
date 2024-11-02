@@ -33,7 +33,7 @@ namespace ProxyLibrary.Buffer
         /// <summary>
         /// Sender
         /// </summary>
-        private ProxySender? _sender = null;
+        public ProxySender? Sender { get; set; } = null;
 
         /// <summary>
         /// Buffer thread.
@@ -44,11 +44,6 @@ namespace ProxyLibrary.Buffer
         /// Disposed flag
         /// </summary>
         private volatile bool _disposed = false;
-
-        /// <summary>
-        /// Network stream to read
-        /// </summary>
-        private NetworkStream _stream;
 
         /// <summary>
         /// Caller id
@@ -65,15 +60,22 @@ namespace ProxyLibrary.Buffer
         /// </summary>
         /// <param name="client">Tcp client</param>
         /// <param name="id">app id</param>
-        public AbstractBuffer(TcpClient client, string id)
+        /// <param name="sender">Sender to use</param>
+        public AbstractBuffer(TcpClient client, string id, ProxySender? sender = null)
         {
             _client = client;
-            _stream = _client.GetStream();
             _appId = id;
+            Sender = sender;
 
-
+            
             _bufferThread = new Thread(() =>
             {
+                Console.WriteLine($"Start listening");
+                if (Sender != null)
+                {
+                    Thread.Sleep(100);
+                }
+
                 while (!_disposed)
                 {
                     ReadData();
@@ -90,28 +92,30 @@ namespace ProxyLibrary.Buffer
         /// <inheritdoc/>
         public void ReadData()
         {
-            if (_stream.DataAvailable)
+            NetworkStream stream = _client.GetStream();
+            if (stream.DataAvailable)
             {
 
                 byte[] buffer = Array.Empty<byte>();
                 int read = 0;
-                while (_stream.DataAvailable)
+                while (stream.DataAvailable)
                 {
-                    buffer = buffer.Concat(new byte[1024]).ToArray();
-                    read+= _stream.Read(buffer, 0, buffer.Length);
+                    byte[] buffer2 = new byte[1024];
+                    read+= stream.Read(buffer2, 0, 1024);
+                    buffer = buffer.Concat(buffer2).ToArray();
                 }
 
                 buffer = buffer.Take(read).ToArray();
 
                 if (buffer.Length > 0)
                 {
-                    if (_sender == null)
+                    if (Sender == null)
                     {
                         ProxyObject message = ProxyObject.Desserialize(buffer);
                         _callerId = message.CallerId;
 
-                        //_sender = new ProxySender(message, _appId);
-                        _sender = new EncryptionProxySender(message, _appId);
+                        Sender = new ProxySender(message, _appId);
+                        //Sender = new EncryptionProxySender(message, _appId);
                         
                         Console.WriteLine($"Created sender to server {message.NextAddress} {message.NextPort}");
                     }
@@ -148,7 +152,7 @@ namespace ProxyLibrary.Buffer
 
                 List<ProxyData> proxyObjects = PrepareData();
 
-                proxyObjects.ForEach(x => _sender.SendData(x.Data));
+                proxyObjects.ForEach(x => Sender.SendData(x.Data));
 
                 _objectToSend = null;
             } 
@@ -159,9 +163,9 @@ namespace ProxyLibrary.Buffer
         {
             _disposed = true;
 
-            if (_sender != null)
+            if (Sender != null)
             {
-                _sender.Close();
+                Sender.Close();
             }
 
             _client.Close();

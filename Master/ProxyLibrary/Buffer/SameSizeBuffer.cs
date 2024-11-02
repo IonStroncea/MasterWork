@@ -20,7 +20,8 @@ namespace ProxyLibrary.Buffer
         /// <param name="client">Client</param>
         /// <param name="packetSize">Size of each message</param>
         /// <param name="id">app id</param>
-        public SameSizeBuffer(TcpClient client, int packetSize, string id) : base(client, id)
+        /// <param name="sender">Sender to use</param>
+        public SameSizeBuffer(TcpClient client, int packetSize, string id, ProxySender? sender = null) : base(client, id, sender)
         {
             _packetSize = packetSize;
         }

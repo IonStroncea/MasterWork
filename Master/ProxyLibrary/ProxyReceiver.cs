@@ -51,6 +51,11 @@ namespace ProxyLibrary
         private volatile bool _disposed = false;
 
         /// <summary>
+        /// Return data flag. True if chanell also used to return data
+        /// </summary>
+        private bool _returnData;
+
+        /// <summary>
         /// Constructor. Sets address and port to listen to
         /// </summary>
         /// <param name="address">Address</param>
@@ -58,13 +63,15 @@ namespace ProxyLibrary
         /// <param name="bufferType">Buffer type</param>
         /// <param name="packetSize">Size of each message</param>
         ///  <param name="handler">Handles when to send messages</param>
-        public ProxyReceiver(string address, int port, BufferEnum bufferType, int packetSize, AbstractHandler handler)
+        ///  <param name="returnData">Return data flag</param>
+        public ProxyReceiver(string address, int port, BufferEnum bufferType, int packetSize, AbstractHandler handler, bool returnData = false)
         {
             _address = address;
             _port = port;
             _bufferType = bufferType;
             _packetSize = packetSize;
             _handler = handler;
+            _returnData = returnData;
         }
 
         /// <summary>
@@ -115,14 +122,37 @@ namespace ProxyLibrary
             while (!_disposed)
             {
                 TcpClient client = _server.AcceptTcpClient();
+                AbstractBuffer? buffer;
 
                 if (_bufferType == BufferEnum.SameSize)
                 {
-                    _handler.AddBuffer(new SameSizeBuffer(client, _packetSize, _port.ToString()));
+                    buffer = new SameSizeBuffer(client, _packetSize, _port.ToString());
                 }
                 else
                 {
-                    _handler.AddBuffer(new DefaultBuffer(client, _port.ToString()));
+                    buffer = new DefaultBuffer(client, _port.ToString());
+                }
+
+                _handler.AddBuffer(buffer);
+                
+                if (_returnData)
+                {
+                    while (buffer.Sender == null)
+                    {
+                        Thread.Sleep(10);
+                    }
+                    ProxySender sender = new ProxySender(new(), _port.ToString(), client);
+
+                    if (_bufferType == BufferEnum.SameSize)
+                    {
+                        buffer = new SameSizeBuffer(buffer.Sender.TcpClient, _packetSize, _port.ToString(), sender);
+                    }
+                    else
+                    {
+                        buffer = new DefaultBuffer(buffer.Sender.TcpClient, _port.ToString(), sender);
+                    }
+
+                    _handler.AddBuffer(buffer);
                 }
             }
         }

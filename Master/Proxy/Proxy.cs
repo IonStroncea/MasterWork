@@ -21,6 +21,7 @@ namespace Proxy
         /// -handler handler type.RegularHandler(default) or SimultaniousHandler
         /// -tokens tokens per turn
         /// -wait wait time
+        /// -return if return values
         /// </param>
         public static void Main(string[] args)
         {
@@ -32,9 +33,14 @@ namespace Proxy
             int tokensPerTurn = 5;
             int timeToWait = 300;
 
+            bool returnValues = false;
+
             int ttl = -1;
 
-
+            if (args.ToList().Contains("-return"))
+            {
+                returnValues = true;
+            }
             if (args.ToList().Contains("-f"))
             {
                 address = args[args.ToList().IndexOf("-f") + 1];
@@ -90,7 +96,7 @@ namespace Proxy
             }
 
 
-            ProxyReceiver proxy = new ProxyReceiver(address, port, bufferEnum, packetSize, handler);
+            ProxyReceiver proxy = new ProxyReceiver(address, port, bufferEnum, packetSize, handler, returnValues);
             proxy.Start();
 
             Console.WriteLine($"Started proxy at {address}:{port}");

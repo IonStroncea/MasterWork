@@ -23,7 +23,7 @@ namespace ProxyLibrary
         /// <summary>
         /// TCP client
         /// </summary>
-        private TcpClient? tcpClient;
+        public TcpClient TcpClient { get; set; }
 
         /// <summary>
         /// Caller id
@@ -41,11 +41,17 @@ namespace ProxyLibrary
         protected string _appId;
 
         /// <summary>
+        /// Flag that indicates if this is first call
+        /// </summary>
+        private bool _firstCall = true;
+
+        /// <summary>
         /// Constructor. Sets server address and proxy address
         /// </summary>
         /// <param name="proxyObject">Proxy object</param>
         /// <param name="id">app id</param>
-        public ProxySender(ProxyObject proxyObject, string id)
+        /// <param name="tcpClient">Tcp client to use. Null if no needed</param>
+        public ProxySender(ProxyObject proxyObject, string id, TcpClient? tcpClient = null)
         {
             _appId = id;
             proxyObject = DecryptProxyObject(proxyObject);
@@ -53,6 +59,16 @@ namespace ProxyLibrary
             _serverPort = proxyObject.NextPort;
             _callerId = proxyObject.CallerId;
             _proxyObject = proxyObject;
+
+            if (tcpClient != null)
+            {
+                TcpClient = tcpClient;
+                _firstCall = false;
+            }
+            else
+            {
+                TcpClient = new TcpClient(_serverAddress, _serverPort);
+            }
         }
 
         /// <summary>
@@ -70,13 +86,13 @@ namespace ProxyLibrary
         /// </summary>
         public void Close()
         {
-            if (tcpClient == null)
+            if (TcpClient == null)
             {
                 return;
             }
-            if (tcpClient.Connected)
+            if (TcpClient.Connected)
             {
-                tcpClient.Close();
+                TcpClient.Close();
             }
         }
 
@@ -86,10 +102,9 @@ namespace ProxyLibrary
         /// <param name="data">Data</param>
         public void SendData(byte[] data)
         {
-            if (tcpClient == null || !tcpClient.Connected)
+            if (_firstCall)
             {
-                tcpClient = new TcpClient(_serverAddress, _serverPort);
-                NetworkStream networkStream = tcpClient.GetStream();
+                NetworkStream networkStream = TcpClient.GetStream();
                 if (_proxyObject.NrOfNextProxies == 0)
                 {
                     networkStream.Write(Encoding.ASCII.GetBytes(_callerId));
@@ -109,12 +124,13 @@ namespace ProxyLibrary
                     networkStream.Write(proxyObject.Serialize());
                     networkStream.Flush();
                 }
+                _firstCall = false;
                 Thread.Sleep(1000);
             }
 
             //Console.WriteLine($"Send {data.Length} bytes to server {_serverAddress}:{_serverPort}");
 
-            NetworkStream stream = tcpClient.GetStream();
+            NetworkStream stream = TcpClient.GetStream();
             stream.Write(data, 0, data.Length);
             stream.Flush();
             //Console.WriteLine($"Succesfully sent {data.Length} bytes to server {_serverAddress}:{_serverPort}");
