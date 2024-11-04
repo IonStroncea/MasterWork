@@ -1,5 +1,6 @@
 ﻿using ProxyLibrary;
 using ProxyLibrary.Handler;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Proxy
@@ -32,11 +33,16 @@ namespace Proxy
             int packetSize = 1000;
             int tokensPerTurn = 5;
             int timeToWait = 300;
+            int copies = 1;
 
             bool returnValues = false;
 
             int ttl = -1;
 
+            if (args.ToList().Contains("-copies"))
+            {
+                copies = int.Parse(args[args.ToList().IndexOf("-copies") + 1]);
+            }
             if (args.ToList().Contains("-return"))
             {
                 returnValues = true;
@@ -81,26 +87,35 @@ namespace Proxy
                 timeToWait = int.Parse(args[args.ToList().IndexOf("-wait") + 1]);
             }
 
+            List<AbstractHandler> handlers = new ();
+            List<ProxyReceiver> receivers = new ();
 
             BufferEnum bufferEnum = (BufferEnum)Enum.Parse(typeof(BufferEnum), bufferType, true);
-
-            AbstractHandler? handler;
-
-            if (handlerType.Equals("simultanious"))
+            for (int i = 0; i < copies; i++)
             {
-                handler = new SimultaniousHandler(tokensPerTurn, timeToWait);
+
+                AbstractHandler? handler;
+
+                if (handlerType.Equals("simultanious"))
+                {
+                    handler = new SimultaniousHandler(tokensPerTurn, timeToWait);
+                }
+                else
+                {
+                    handler = new RegularHandler(tokensPerTurn);
+                }
+
+
+                ProxyReceiver proxy = new ProxyReceiver(address, port + i, bufferEnum, packetSize, handler, returnValues);
+
+                handlers.Add(handler);
+                receivers.Add(proxy);
+                Console.WriteLine($"Started proxy at {address}:{port + i}");
             }
-            else 
-            {
-                handler = new RegularHandler(tokensPerTurn);
-            }
 
+            receivers.ForEach(proxy => proxy.Start());
 
-            ProxyReceiver proxy = new ProxyReceiver(address, port, bufferEnum, packetSize, handler, returnValues);
-            proxy.Start();
-
-            Console.WriteLine($"Started proxy at {address}:{port}");
-
+           
             if (ttl > -1)
             {
                 TimeSpan toLive = TimeSpan.FromSeconds(ttl);
@@ -116,14 +131,16 @@ namespace Proxy
                     stopwatch.Stop();
                     elapsed = stopwatch.Elapsed;
                 }
-                proxy.Stop();
-                handler.Stop();
+
+                receivers.ForEach(proxy => proxy.Stop());
+                handlers.ForEach(handler =>  handler.Stop());
             }
             else
             {
                 Console.ReadKey();
-                proxy.Stop();
-                handler.Stop();
+
+                receivers.ForEach(proxy => proxy.Stop());
+                handlers.ForEach(handler => handler.Stop());
             }
         }
     }

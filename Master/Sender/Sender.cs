@@ -22,6 +22,7 @@ namespace Sender
         /// -nrOfProxies number of proxies after first
         /// -proxies list of proxies addresses and ports
         /// -return if return values
+        /// -copies copies of senders
         /// </param>
         public static void Main(string[] args)
         {
@@ -34,6 +35,7 @@ namespace Sender
             int dataSize = 1024;
             int nrOfProxies = 1;
             bool returnValues = false;
+            int copies = 1;
 
             List<ProxyInfo> nextProxies =
             [
@@ -44,6 +46,10 @@ namespace Sender
                 }
             ];
 
+            if (args.ToList().Contains("-copies"))
+            {
+                copies = int.Parse(args[args.ToList().IndexOf("-copies") + 1]);
+            }
             if (args.ToList().Contains("-return"))
             {
                 returnValues = true;
@@ -91,54 +97,83 @@ namespace Sender
                 dataSize = int.Parse(args[args.ToList().IndexOf("-size") + 1]);
             }
 
-            ISender sender = returnValues ? new SenderWithReturn(address, port, name, nextProxies) : new BaseSender(address, port, name, nextProxies);
-            //ISender sender = new EncryptionBaseSender(address, port, name, nextProxies);
-            Console.WriteLine($"Created sender to {address}:{port}");
+            List<ISender> senders = new ();
 
-            if (totalDataSize > -1)
+            for (int i = 0; i < copies; i++)
             {
-                sender.SendTotalAmountOfData(dataSize, totalDataSize);
+                ISender sender = returnValues ? new SenderWithReturn(address, port, name, nextProxies) : new BaseSender(address, port, name, nextProxies);
+                
+                senders.Add(sender);
+                //senders.Add(new EncryptionBaseSender(address, port + i, name, nextProxies));
+                Console.WriteLine($"Created sender to {address}:{port}");
+
+                if (totalDataSize > -1)
+                {
+                    sender.SendTotalAmountOfData(dataSize, totalDataSize);
+                }
             }
 
+            List<Task> runTasks = new();
             if (ttl > -1)
-            { 
-                TimeSpan toLive = TimeSpan.FromSeconds(ttl);
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                stopwatch.Stop();
-                TimeSpan elapsed = stopwatch.Elapsed;
-
-                while (elapsed <= toLive)
+            {
+               
+                foreach (var sender in senders)
                 {
-                    if (dataSize == -1)
+                    var runTask = new Task(() => 
                     {
-                        sender.SendRandomSizeData();
-                    }
-                    else 
-                    {
-                        sender.SendSpecificSizeData(dataSize);
-                    }
-                    Thread.Sleep(5);
-                    stopwatch.Stop();
-                    elapsed = stopwatch.Elapsed;
+                        TimeSpan toLive = TimeSpan.FromSeconds(ttl);
+                        Stopwatch stopwatch = new Stopwatch();
+                        stopwatch.Start();
+
+                        stopwatch.Stop();
+                        TimeSpan elapsed = stopwatch.Elapsed;
+
+                        while (elapsed <= toLive)
+                        {
+                            if (dataSize == -1)
+                            {
+                                sender.SendRandomSizeData();
+                            }
+                            else
+                            {
+                                sender.SendSpecificSizeData(dataSize);
+                            }
+                            Thread.Sleep(5);
+                            stopwatch.Stop();
+                            elapsed = stopwatch.Elapsed;
+                        }
+                    });
+
+                    runTasks.Add(runTask);
                 }
             }
             else 
             {
-                while (true)
+                foreach (var sender in senders)
                 {
-                    if (dataSize == -1)
+                    var runTask = new Task(() =>
                     {
-                        sender.SendRandomSizeData();
-                    }
-                    else
-                    {
-                        sender.SendSpecificSizeData(dataSize);
-                    }
-                    Thread.Sleep(5);
+                        while (true)
+                        {
+                            if (dataSize == -1)
+                            {
+                                sender.SendRandomSizeData();
+                            }
+                            else
+                            {
+                                sender.SendSpecificSizeData(dataSize);
+                            }
+                            Thread.Sleep(5);
+                        }
+                    });
+
+                    runTasks.Add(runTask);
                 }
             }
+
+            runTasks.ForEach(x => x.Start());
+
+            Task.WaitAll(runTasks.ToArray());
         }
     }
 }

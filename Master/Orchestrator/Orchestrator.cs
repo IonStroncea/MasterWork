@@ -34,15 +34,24 @@ namespace Orchestrator
             int timeToWait = 300;
             int end = 1;
             int multiplySenders = 1;
-            int proxies = 3;
+            int proxies = 1;
+            int sendersCopies = 4;
+            int proxyCopies = 3;
 
-            bool returnValues = true;
+            bool returnValues = false;
 
             if (args.ToList().Contains("-end"))
             {
                 end = int.Parse(args[args.ToList().IndexOf("-end") + 1]);
             }
-
+            if (args.ToList().Contains("-sendersCopies"))
+            {
+                sendersCopies = int.Parse(args[args.ToList().IndexOf("-sendersCopies") + 1]);
+            }
+            if (args.ToList().Contains("-proxyCopies"))
+            {
+                proxyCopies = int.Parse(args[args.ToList().IndexOf("-proxyCopies") + 1]);
+            }
             if (args.ToList().Contains("-return"))
             {
                 returnValues = true;
@@ -103,12 +112,12 @@ namespace Orchestrator
                 sender.StartInfo.FileName = "Sender.exe";
                 string proxiesString= "";
 
-                for (int j = 0; j < proxies; j++)
+                for (int j = 0; j < proxies || j < proxyCopies; j++)
                 {
-                    proxiesString += $" 127.0.0.1 {10000 + j * 100}";
+                    proxiesString += $" 127.0.0.1 {10000 + j}";
                 }
 
-                sender.StartInfo.Arguments = $"/c {returnValuesString} -p {serverPort + ((int)(i/multiplySenders))} -total {5000000} -size {1024 * (1 + i * 10)} -n {i + 1} -nrOfProxies {proxies} -proxies{proxiesString}";
+                sender.StartInfo.Arguments = $"/c -copies {sendersCopies} {returnValuesString} -p {serverPort + ((int)(i/multiplySenders))} -total {5000000} -size {1024 * (1 + i * 10)} -n {i + 1} -nrOfProxies {Math.Max(proxies, proxyCopies)} -proxies{proxiesString}";
 
 
                 senders.Add(sender);
@@ -120,7 +129,7 @@ namespace Orchestrator
             {
                 Process proxy = new();
                 proxy.StartInfo.FileName = "Proxy.exe";
-                proxy.StartInfo.Arguments = $"/c {returnValuesString} -buffer {bufferType} -size {packetSize} -handler {handlerType} -tokens {tokensPerTurn} -wait {timeToWait} -p {10000 + i * 100}";
+                proxy.StartInfo.Arguments = $"/c -copies {proxyCopies} {returnValuesString} -buffer {bufferType} -size {packetSize} -handler {handlerType} -tokens {tokensPerTurn} -wait {timeToWait} -p {10000 + i}";
                 proxiesList.Add(proxy);
             }
 
