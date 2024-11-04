@@ -22,6 +22,7 @@ namespace Common
         /// <param name="fileName">File</param>
         public CSVWriter(string fileName)
         {
+            Console.WriteLine($"Creating file {fileName}");
             _fileName = fileName;
 
             _writer = new StreamWriter(fileName, false);

@@ -50,6 +50,7 @@ namespace SenderLibrary
         /// <param name="name">Name of sender</param>
         public BaseSender(string serverAddress, int serverPort, string name, List<ProxyInfo> proxyInfos)
         {
+            proxyInfos = new List<ProxyInfo>(proxyInfos);
             _serverAddress = serverAddress;
             _serverPort = serverPort;
             _name = name;
@@ -84,9 +85,6 @@ namespace SenderLibrary
                 _stream.Write(messageBytes, 0, messageBytes.Length);
                 _stream.Flush();
             }
-
-
-            Thread.Sleep(1000);
         }
 
         /// <summary>

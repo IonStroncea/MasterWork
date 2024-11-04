@@ -22,7 +22,6 @@ namespace Orchestrator
         /// -tokens tokens per turn
         /// -wait wait time
         /// -proxies nr of proxies
-        /// -multiplySenders how many senders for one server
         /// -return if return values
         /// </param>
         public static void Main(string[] args)
@@ -32,11 +31,10 @@ namespace Orchestrator
             int packetSize = 1000;
             int tokensPerTurn = 5;
             int timeToWait = 300;
-            int end = 1;
-            int multiplySenders = 1;
+            int end = 2;
+            int sendersCopies = 1000;
             int proxies = 1;
-            int sendersCopies = 4;
-            int proxyCopies = 3;
+            int proxyCopies = 1;
 
             bool returnValues = false;
 
@@ -55,10 +53,6 @@ namespace Orchestrator
             if (args.ToList().Contains("-return"))
             {
                 returnValues = true;
-            }
-            if (args.ToList().Contains("-multiplySenders"))
-            {
-                multiplySenders = int.Parse(args[args.ToList().IndexOf("-multiplySenders") + 1]);
             }
 
             if (args.ToList().Contains("-buffer"))
@@ -97,27 +91,28 @@ namespace Orchestrator
             string address = "127.0.0.1";
             string returnValuesString = returnValues ? "-return" : "";
 
-            for (int i = 0; i < end; i++)
+            for (int i = 0; i < 1; i++)
             {              
                 Process server = new Process();
                 server.StartInfo.FileName = "Server.exe";
-                server.StartInfo.Arguments = $"/c -f {address} -p {serverPort + i} {returnValuesString}";
+                server.StartInfo.Arguments = $"/c -f {address} -p {serverPort} {returnValuesString}";
 
                 servers.Add(server);
             }
 
-            for (int i = 0; i < multiplySenders * end; i++)
+            for (int i = 0; i <end; i++)
             {
                 Process sender = new Process();
                 sender.StartInfo.FileName = "Sender.exe";
                 string proxiesString= "";
+                int currentCopies = i > 0 ? 1 : sendersCopies;
 
                 for (int j = 0; j < proxies || j < proxyCopies; j++)
                 {
                     proxiesString += $" 127.0.0.1 {10000 + j}";
                 }
 
-                sender.StartInfo.Arguments = $"/c -copies {sendersCopies} {returnValuesString} -p {serverPort + ((int)(i/multiplySenders))} -total {5000000} -size {1024 * (1 + i * 10)} -n {i + 1} -nrOfProxies {Math.Max(proxies, proxyCopies)} -proxies{proxiesString}";
+                sender.StartInfo.Arguments = $"/c -copies {currentCopies} {returnValuesString} -p {serverPort} -total {5000000} -size {1024 * (1 + i * 10)} -n {i + 1} -nrOfProxies {Math.Max(proxies, proxyCopies)} -proxies{proxiesString}";
 
 
                 senders.Add(sender);

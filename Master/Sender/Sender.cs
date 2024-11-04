@@ -101,73 +101,86 @@ namespace Sender
 
             for (int i = 0; i < copies; i++)
             {
-                ISender sender = returnValues ? new SenderWithReturn(address, port, name, nextProxies) : new BaseSender(address, port, name, nextProxies);
+                
+                ISender sender = returnValues ? new SenderWithReturn(address, port, $"{name}_{i}", nextProxies)
+                    : new BaseSender(address, port, $"{name}_{i}", nextProxies);
                 
                 senders.Add(sender);
                 //senders.Add(new EncryptionBaseSender(address, port + i, name, nextProxies));
-                Console.WriteLine($"Created sender to {address}:{port}");
-
-                if (totalDataSize > -1)
-                {
-                    sender.SendTotalAmountOfData(dataSize, totalDataSize);
-                }
+                Console.WriteLine($"Created {name}_{i} sender to {address}:{port}");
             }
 
             List<Task> runTasks = new();
-            if (ttl > -1)
-            {
-               
-                foreach (var sender in senders)
-                {
-                    var runTask = new Task(() => 
-                    {
-                        TimeSpan toLive = TimeSpan.FromSeconds(ttl);
-                        Stopwatch stopwatch = new Stopwatch();
-                        stopwatch.Start();
 
-                        stopwatch.Stop();
-                        TimeSpan elapsed = stopwatch.Elapsed;
 
-                        while (elapsed <= toLive)
-                        {
-                            if (dataSize == -1)
-                            {
-                                sender.SendRandomSizeData();
-                            }
-                            else
-                            {
-                                sender.SendSpecificSizeData(dataSize);
-                            }
-                            Thread.Sleep(5);
-                            stopwatch.Stop();
-                            elapsed = stopwatch.Elapsed;
-                        }
-                    });
-
-                    runTasks.Add(runTask);
-                }
-            }
-            else 
+            if (totalDataSize > -1)
             {
                 foreach (var sender in senders)
                 {
                     var runTask = new Task(() =>
                     {
-                        while (true)
-                        {
-                            if (dataSize == -1)
-                            {
-                                sender.SendRandomSizeData();
-                            }
-                            else
-                            {
-                                sender.SendSpecificSizeData(dataSize);
-                            }
-                            Thread.Sleep(5);
-                        }
+                        sender.SendTotalAmountOfData(dataSize, totalDataSize);
                     });
-
                     runTasks.Add(runTask);
+                }
+            }
+            else
+            {
+                if (ttl > -1)
+                {
+
+                    foreach (var sender in senders)
+                    {
+                        var runTask = new Task(() =>
+                        {
+                            TimeSpan toLive = TimeSpan.FromSeconds(ttl);
+                            Stopwatch stopwatch = new Stopwatch();
+                            stopwatch.Start();
+
+                            stopwatch.Stop();
+                            TimeSpan elapsed = stopwatch.Elapsed;
+
+                            while (elapsed <= toLive)
+                            {
+                                if (dataSize == -1)
+                                {
+                                    sender.SendRandomSizeData();
+                                }
+                                else
+                                {
+                                    sender.SendSpecificSizeData(dataSize);
+                                }
+                                Thread.Sleep(5);
+                                stopwatch.Stop();
+                                elapsed = stopwatch.Elapsed;
+                            }
+                        });
+
+                        runTasks.Add(runTask);
+                    }
+                }
+                else
+                {
+                    foreach (var sender in senders)
+                    {
+                        var runTask = new Task(() =>
+                        {
+                            while (true)
+                            {
+                                if (dataSize == -1)
+                                {
+                                    sender.SendRandomSizeData();
+                                }
+                                else
+                                {
+                                    sender.SendSpecificSizeData(dataSize);
+                                }
+                                Thread.Sleep(5);
+                            }
+                        });
+
+                        runTasks.Add(runTask);
+                    }
                 }
             }
 
