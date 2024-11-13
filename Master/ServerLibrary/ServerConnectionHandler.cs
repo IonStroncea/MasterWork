@@ -62,42 +62,31 @@ namespace ServerLibrary
         /// </summary>
         public void ReadData()
         {
-            NetworkStream stream = _client.GetStream();
-            if (stream.DataAvailable)
+            int avalableData = _client.Available;
+            if (avalableData>0)
             {
+                NetworkStream stream = _client.GetStream();
                 if (_callerId == string.Empty)
                 {
-                    byte[] bufferString = Array.Empty<byte>();
-                    int readString = 0;
-                    while (stream.DataAvailable)
-                    {
-                        byte[] buffer2 = new byte[1024];
-                        readString += stream.Read(buffer2, 0, 1024);
-                        bufferString = bufferString.Concat(buffer2).ToArray();
-                    }
-
-                    bufferString = bufferString.Take(readString).ToArray();
+                    byte[] bufferString = new byte[avalableData];
+                    
+                    stream.Read(bufferString, 0, bufferString.Length);
                     _callerId = Encoding.ASCII.GetString(bufferString);
 
                     _writer = new CSVWriter($"Server{_callerId}.csv");
                     return;
                 }
 
-                byte[] buffer = Array.Empty<byte>();
-                int read = 0;
-                while (stream.DataAvailable)
-                {
-                    byte[] buffer2 = new byte[1024];
-                    read += stream.Read(buffer2, 0, 1024);
-                    buffer = buffer.Concat(buffer2).ToArray();
-                }
+                byte[] buffer = new byte[avalableData];
+                stream.Read(buffer, 0, avalableData);
 
                 if (_writer != null)
                 {
                     string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
-                    _writer.WriteData(timestamp,read.ToString());
-                    //Console.WriteLine($"Received {read}bytes of data from {_callerId}");
+                    _writer.WriteData(timestamp, avalableData.ToString());
+                    
                 }
+                Console.WriteLine($"Received {avalableData} bytes of data from {_callerId}");
 
                 SendBack(buffer, stream);
             }

@@ -23,7 +23,7 @@ namespace ProxyLibrary.Buffer
         /// <summary>
         /// Tokens to send
         /// </summary>
-        private int _tokens = 50000;
+        private int _tokens = 100;
 
         /// <summary>
         /// Object to sned next
@@ -92,20 +92,15 @@ namespace ProxyLibrary.Buffer
         /// <inheritdoc/>
         public void ReadData()
         {
-            NetworkStream stream = _client.GetStream();
-            if (stream.DataAvailable)
+            if (_client.Available > 0)
             {
+                int availableData = _client.Available;
+                byte[] buffer = new byte[availableData];
+                NetworkStream stream = _client.GetStream();
+                
+                stream.Read(buffer, 0, availableData);
 
-                byte[] buffer = Array.Empty<byte>();
-                int read = 0;
-                while (stream.DataAvailable)
-                {
-                    byte[] buffer2 = new byte[1024];
-                    read+= stream.Read(buffer2, 0, 1024);
-                    buffer = buffer.Concat(buffer2).ToArray();
-                }
-
-                buffer = buffer.Take(read).ToArray();
+                buffer = buffer.ToArray();
 
                 if (buffer.Length > 0)
                 {
@@ -135,7 +130,6 @@ namespace ProxyLibrary.Buffer
             _tokens += tokens;
 
             bool hasValue = true;
-
             if (_objectToSend == null)
             {
                 hasValue = _lastMessages.TryDequeue(out _objectToSend);
@@ -146,6 +140,7 @@ namespace ProxyLibrary.Buffer
                 return;
             }
 
+            //Console.WriteLine(_tokens + "-" + _objectToSend.Data.Length);
             if (_tokens >= _objectToSend.Data.Length)
             {
                 _tokens -= _objectToSend.Data.Length;

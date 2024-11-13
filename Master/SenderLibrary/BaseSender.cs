@@ -23,7 +23,7 @@ namespace SenderLibrary
         /// <summary>
         /// Tcp client
         /// </summary>
-        private TcpClient _client;
+        protected TcpClient _client;
 
         /// <summary>
         /// Name of sender
@@ -119,7 +119,7 @@ namespace SenderLibrary
                 {
                     Console.WriteLine($"{_name} sent {sentdata}/{totalData} to {_serverAddress}:{_serverPort}");
                 }
-                Thread.Sleep(5);
+                Thread.Sleep(50);
             }
 
             //Console.WriteLine($"{_name} successfully sent all data to {_serverAddress}:{_serverPort}");

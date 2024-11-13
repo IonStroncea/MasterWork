@@ -29,10 +29,10 @@ namespace Orchestrator
             string bufferType = "Default";
             string handlerType = "RegularHandler";
             int packetSize = 1000;
-            int tokensPerTurn = 5;
+            int tokensPerTurn = 1000000;
             int timeToWait = 300;
-            int end = 2;
-            int sendersCopies = 1000;
+            int end = 1;
+            int sendersCopies = 1;
             int proxies = 1;
             int proxyCopies = 1;
 
@@ -112,7 +112,7 @@ namespace Orchestrator
                     proxiesString += $" 127.0.0.1 {10000 + j}";
                 }
 
-                sender.StartInfo.Arguments = $"/c -copies {currentCopies} {returnValuesString} -p {serverPort} -total {5000000} -size {1024 * (1 + i * 10)} -n {i + 1} -nrOfProxies {Math.Max(proxies, proxyCopies)} -proxies{proxiesString}";
+                sender.StartInfo.Arguments = $"/c -copies {currentCopies} {returnValuesString} -p {serverPort} -total {5000000} -size {420 * (1 + i * 10)} -n {i + 1} -nrOfProxies {Math.Max(proxies, proxyCopies)} -proxies{proxiesString}";
 
 
                 senders.Add(sender);
