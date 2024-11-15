@@ -2,6 +2,7 @@
 using Server;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http.Headers;
 
 namespace Orchestrator
 {
@@ -27,12 +28,12 @@ namespace Orchestrator
         public static void Main(string[] args)
         {
             string bufferType = "Default";
-            string handlerType = "RegularHandler";
-            int packetSize = 1000;
-            int tokensPerTurn = 1000000;
-            int timeToWait = 300;
-            int end = 1;
-            int sendersCopies = 1;
+            string handlerType = "";
+            int packetSize = 1000;        
+            int timeToWait = 1;
+            int tokensPerTurn = 5000 * timeToWait;
+            int end = 3;
+            int sendersCopies = 33;
             int proxies = 1;
             int proxyCopies = 1;
 
@@ -91,28 +92,28 @@ namespace Orchestrator
             string address = "127.0.0.1";
             string returnValuesString = returnValues ? "-return" : "";
 
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < end; i++)
             {              
                 Process server = new Process();
                 server.StartInfo.FileName = "Server.exe";
-                server.StartInfo.Arguments = $"/c -f {address} -p {serverPort} {returnValuesString}";
+                server.StartInfo.Arguments = $"/c -f {address} -p {serverPort + i} {returnValuesString}";
 
                 servers.Add(server);
             }
-
+            Random random = new();
             for (int i = 0; i <end; i++)
             {
                 Process sender = new Process();
                 sender.StartInfo.FileName = "Sender.exe";
                 string proxiesString= "";
-                int currentCopies = i > 0 ? 1 : sendersCopies;
+                int currentCopies = sendersCopies;
 
                 for (int j = 0; j < proxies || j < proxyCopies; j++)
                 {
                     proxiesString += $" 127.0.0.1 {10000 + j}";
                 }
 
-                sender.StartInfo.Arguments = $"/c -copies {currentCopies} {returnValuesString} -p {serverPort} -total {5000000} -size {420 * (1 + i * 10)} -n {i + 1} -nrOfProxies {Math.Max(proxies, proxyCopies)} -proxies{proxiesString}";
+                sender.StartInfo.Arguments = $"/c -copies {currentCopies} {returnValuesString} -p {serverPort + i} -total {1000000} -size {(int)(1024 + random.NextInt64(2048))} -n {i + 1} -nrOfProxies {Math.Max(proxies, proxyCopies)} -proxies{proxiesString}";
 
 
                 senders.Add(sender);
@@ -143,7 +144,8 @@ namespace Orchestrator
 
             Thread.Sleep(2000);
 
-            senders.ForEach(sender => sender.Start());
+            //senders.ForEach(sender => sender.Start());
+            Task.Factory.StartNew(() => senders.ForEach(task => task.Start()));
 
             Console.ReadLine();
 

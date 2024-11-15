@@ -67,13 +67,13 @@ namespace UssageMetter
                         cpuUsage += cpu.NextValue();
 
                     });
-                    //Console.WriteLine($"Process use : {memsize} Kb");
-                    //Console.WriteLine("Process CPU % = " + pct);
+                    //Console.WriteLine($"Process use : {memUsage/1024} Kb");
+                    //Console.WriteLine("Process CPU % = " + cpuUsage);
 
                     string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
                     writer.WriteData(timestamp, ((int)(memUsage / 1024)).ToString(), cpuUsage.ToString());
                     
-                    Thread.Sleep(1000);
+                    Thread.Sleep(100);
                 }
             });
 

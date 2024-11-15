@@ -47,11 +47,11 @@ namespace ProxyLibrary.Handler
 
                 Task.WaitAll(tasksToSend.ToArray());
 
-                _stopwatch.Start();
+                _stopwatch.Restart();
             }
             else 
             {
-                _stopwatch.Restart();
+                _stopwatch.Start();    
             }       
         }
     }

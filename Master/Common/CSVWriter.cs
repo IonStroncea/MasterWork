@@ -37,6 +37,7 @@ namespace Common
             string lineToWrite = string.Join(",", values);
 
             _writer.WriteLine(lineToWrite);
+            _writer.Flush();
         }
 
         /// <summary>

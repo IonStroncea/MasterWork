@@ -30,8 +30,8 @@ namespace Proxy
             string bufferType = "Default";
             string handlerType = "";
             int port = 10000;
-            int packetSize = 1000;
-            int tokensPerTurn = 5;
+            int packetSize = 300;
+            int tokensPerTurn = 50;
             int timeToWait = 300;
             int copies = 1;
 

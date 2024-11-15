@@ -86,7 +86,7 @@ namespace ServerLibrary
                     _writer.WriteData(timestamp, avalableData.ToString());
                     
                 }
-                Console.WriteLine($"Received {avalableData} bytes of data from {_callerId}");
+                //Console.WriteLine($"Received {avalableData} bytes of data from {_callerId}");
 
                 SendBack(buffer, stream);
             }

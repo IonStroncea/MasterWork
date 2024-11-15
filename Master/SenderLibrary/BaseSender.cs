@@ -109,20 +109,23 @@ namespace SenderLibrary
         {
             int sentdata = 0;
             int i = 0;
+            int percentage = 0;
 
             while (sentdata < totalData)
             {
                 i++;
                 sentdata += dataSize;
                 SendSpecificSizeData(dataSize);
-                if (i % 100 == 0)
+                double currentPercentage = ((sentdata * 1.0d) / (totalData * 1.0d)) * 10.0d;
+                if ((int)currentPercentage > percentage)
                 {
-                    Console.WriteLine($"{_name} sent {sentdata}/{totalData} to {_serverAddress}:{_serverPort}");
+                    Console.WriteLine($"{_name} sent {currentPercentage * 10.0d}% of data");
+                    percentage = (int)currentPercentage;
                 }
                 Thread.Sleep(50);
             }
 
-            //Console.WriteLine($"{_name} successfully sent all data to {_serverAddress}:{_serverPort}");
+            Console.WriteLine($"{_name} successfully sent all data to {_serverAddress}:{_serverPort}");
         }
 
         /// <inheritdoc/>
