@@ -19,7 +19,7 @@ namespace ProxyLibrary.Handler
         {
             foreach (var item in _buffers)
             {
-                item.SendData(_tokensPerTurn);
+               item.SendData(_tokensPerTurn);
             }
         }
     }

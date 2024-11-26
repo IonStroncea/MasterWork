@@ -15,9 +15,9 @@ namespace ProxyLibrary.Buffer
 
 
         /// <inheritdoc/>
-        public override List<ProxyData> PrepareData()
+        public override List<ProxyData> PrepareData(ProxyData message)
         {
-            return [_objectToSend];
+            return [message];
         }
     }
 }

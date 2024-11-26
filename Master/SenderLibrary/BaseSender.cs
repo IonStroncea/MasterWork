@@ -38,7 +38,7 @@ namespace SenderLibrary
         /// <summary>
         /// CSV writer
         /// </summary>
-        protected CSVWriter _writer;
+        protected CSVWriter? _writer;
 
         /// <summary>
         /// Constructor. Sets server address and proxy address
@@ -54,7 +54,10 @@ namespace SenderLibrary
             _serverAddress = serverAddress;
             _serverPort = serverPort;
             _name = name;
-            _writer = new CSVWriter($"Sender{_name}.csv");
+            if (_name.Contains("_0"))
+            {
+                _writer = new CSVWriter($"Sender{_name}.csv");
+            }
 
             if (proxyInfos.Count == 0)
             {
@@ -85,6 +88,11 @@ namespace SenderLibrary
                 _stream.Write(messageBytes, 0, messageBytes.Length);
                 _stream.Flush();
             }
+            if (_writer != null)
+            {
+                string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+                //_writer.WriteData(timestamp, "Created connection");
+            }
         }
 
         /// <summary>
@@ -110,22 +118,22 @@ namespace SenderLibrary
             int sentdata = 0;
             int i = 0;
             int percentage = 0;
-
+            Thread.Sleep(500);
             while (sentdata < totalData)
             {
                 i++;
                 sentdata += dataSize;
                 SendSpecificSizeData(dataSize);
                 double currentPercentage = ((sentdata * 1.0d) / (totalData * 1.0d)) * 10.0d;
-                if ((int)currentPercentage > percentage)
+                if ((int)currentPercentage > percentage && _writer != null)
                 {
                     Console.WriteLine($"{_name} sent {currentPercentage * 10.0d}% of data");
                     percentage = (int)currentPercentage;
                 }
-                Thread.Sleep(50);
+                Thread.Sleep(500);
             }
 
-            Console.WriteLine($"{_name} successfully sent all data to {_serverAddress}:{_serverPort}");
+            //Console.WriteLine($"{_name} successfully sent all data to {_serverAddress}:{_serverPort}");
         }
 
         /// <inheritdoc/>
@@ -153,8 +161,11 @@ namespace SenderLibrary
             _stream.Write(messageBytes, 0, messageBytes.Length);
             _stream.Flush();
 
-            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
-            _writer.WriteData(timestamp, messageBytes.Length.ToString() , "send");
+            if (_writer != null)
+            {
+                string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+                _writer.WriteData(timestamp, messageBytes.Length.ToString(), "send");
+            }
 
             //Console.WriteLine($"Successfully sent {messageBytes.Length} bytes to proxy to server {_serverAddress}:{_serverPort}");
 

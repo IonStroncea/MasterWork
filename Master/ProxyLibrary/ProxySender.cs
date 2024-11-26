@@ -69,6 +69,27 @@ namespace ProxyLibrary
             {
                 TcpClient = new TcpClient(_serverAddress, _serverPort);
             }
+
+            NetworkStream networkStream = TcpClient.GetStream();
+            if (_proxyObject.NrOfNextProxies == 0)
+            {
+                networkStream.Write(Encoding.ASCII.GetBytes(_callerId));
+                networkStream.Flush();
+            }
+            else
+            {
+                ProxyObject proxyObjectToSend = new ProxyObject
+                {
+                    NextAddress = _proxyObject.NextEndPoints[0].NextAddress,
+                    NextPort = _proxyObject.NextEndPoints[0].NextPort,
+                    CallerId = _proxyObject.CallerId,
+                    NrOfNextProxies = _proxyObject.NrOfNextProxies - 1,
+                    NextEndPoints = _proxyObject.NextEndPoints.Skip(1).ToList()
+                };
+
+                networkStream.Write(proxyObjectToSend.Serialize());
+                networkStream.Flush();
+            }
         }
 
         /// <summary>
@@ -102,32 +123,6 @@ namespace ProxyLibrary
         /// <param name="data">Data</param>
         public void SendData(byte[] data)
         {
-            if (_firstCall)
-            {
-                NetworkStream networkStream = TcpClient.GetStream();
-                if (_proxyObject.NrOfNextProxies == 0)
-                {
-                    networkStream.Write(Encoding.ASCII.GetBytes(_callerId));
-                    networkStream.Flush();
-                }
-                else 
-                {
-                    ProxyObject proxyObject = new ProxyObject 
-                    { 
-                        NextAddress = _proxyObject.NextEndPoints[0].NextAddress,
-                        NextPort = _proxyObject.NextEndPoints[0].NextPort,
-                        CallerId = _proxyObject.CallerId,
-                        NrOfNextProxies = _proxyObject.NrOfNextProxies-1,
-                        NextEndPoints = _proxyObject.NextEndPoints.Skip(1).ToList()
-                    };
-
-                    networkStream.Write(proxyObject.Serialize());
-                    networkStream.Flush();
-                }
-                _firstCall = false;
-                Thread.Sleep(1000);
-            }
-
             //Console.WriteLine($"Send {data.Length} bytes to server {_serverAddress}:{_serverPort}");
 
             NetworkStream stream = TcpClient.GetStream();

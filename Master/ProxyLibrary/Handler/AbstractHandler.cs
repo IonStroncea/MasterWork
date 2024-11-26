@@ -74,7 +74,7 @@ namespace ProxyLibrary.Handler
             while (!_disposed) 
             {
                 Send();
-                Thread.Sleep(10);
+                Thread.Sleep(1);
             }
         }
 

@@ -73,7 +73,12 @@ namespace ServerLibrary
                     stream.Read(bufferString, 0, bufferString.Length);
                     _callerId = Encoding.ASCII.GetString(bufferString);
 
-                    _writer = new CSVWriter($"Server{_callerId}.csv");
+                    if (_callerId.Contains("_0"))
+                    {
+                        _writer = new CSVWriter($"Server{_callerId}.csv");
+                        string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+                        //_writer.WriteData(timestamp, "Created connection");
+                    }
                     return;
                 }
 
@@ -84,9 +89,12 @@ namespace ServerLibrary
                 {
                     string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
                     _writer.WriteData(timestamp, avalableData.ToString());
-                    
+                    if (_callerId.Contains("1_0", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        //Console.WriteLine(timestamp);
+                    }
+                    //Console.WriteLine($"Received {avalableData} bytes of data from {_callerId}");
                 }
-                //Console.WriteLine($"Received {avalableData} bytes of data from {_callerId}");
 
                 SendBack(buffer, stream);
             }

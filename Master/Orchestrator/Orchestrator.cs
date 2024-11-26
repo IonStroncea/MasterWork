@@ -29,11 +29,11 @@ namespace Orchestrator
         {
             string bufferType = "Default";
             string handlerType = "";
-            int packetSize = 1000;        
+            int packetSize = 4000;        
             int timeToWait = 1;
-            int tokensPerTurn = 5000 * timeToWait;
+            int tokensPerTurn = 500;
             int end = 3;
-            int sendersCopies = 33;
+            int sendersCopies = 333;
             int proxies = 1;
             int proxyCopies = 1;
 

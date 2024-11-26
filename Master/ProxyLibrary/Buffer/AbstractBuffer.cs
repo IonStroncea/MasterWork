@@ -87,7 +87,7 @@ namespace ProxyLibrary.Buffer
         }
 
         /// <inheritdoc/>
-        public abstract List<ProxyData> PrepareData();
+        public abstract List<ProxyData> PrepareData(ProxyData message);
 
         /// <inheritdoc/>
         public void ReadData()
@@ -118,7 +118,9 @@ namespace ProxyLibrary.Buffer
                     {
                         ProxyData message = new ProxyData { Data = buffer};
                         //Console.WriteLine($"Received data of size {buffer.Length} bytes from {_callerId}");
-                        _lastMessages.Enqueue(message);
+                        List<ProxyData> datas = PrepareData(message);
+                        datas.ForEach(_lastMessages.Enqueue);
+                        
                     }
                 }
             }
@@ -143,13 +145,22 @@ namespace ProxyLibrary.Buffer
             //Console.WriteLine(_tokens + "-" + _objectToSend.Data.Length);
             if (_tokens >= _objectToSend.Data.Length)
             {
+
                 _tokens -= _objectToSend.Data.Length;
-
-                List<ProxyData> proxyObjects = PrepareData();
-
-                proxyObjects.ForEach(x => Sender.SendData(x.Data));
-
+                ProxyData sendObject = _objectToSend;
                 _objectToSend = null;
+
+                Task.Factory.StartNew(() =>
+                {
+                    Sender.SendData(sendObject.Data);  
+                });
+
+                if (_callerId.Contains("1_0", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    //Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + "--" + sendObject.Data.Length);
+                    //ThreadPool.GetMaxThreads(out int max, out _);
+                    //Console.WriteLine($"Count - {ThreadPool.ThreadCount} | Pending - {ThreadPool.PendingWorkItemCount} | Max - {max}");
+                }
             } 
         }
 

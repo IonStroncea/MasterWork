@@ -28,28 +28,29 @@ namespace ProxyLibrary.Buffer
 
 
         /// <imheritdoc/>
-        public override List<ProxyData> PrepareData()
+        public override List<ProxyData> PrepareData(ProxyData message)
         {
             List<ProxyData> resultList = new();
 
-            for (int i = 0; i < _objectToSend.Data.Length; i += _packetSize)
+            for (int i = 0; i < message.Data.Length; i += _packetSize)
             {
                 byte[] data = new byte[_packetSize];
-                if (i + _packetSize <= _objectToSend.Data.Length)
+                if (i + _packetSize <= message.Data.Length)
                 {
-                    Array.Copy(_objectToSend.Data, i, data, 0, _packetSize);
+                    Array.Copy(message.Data, i, data, 0, _packetSize);
                 }
                 else
                 {
-                    Array.Copy(_objectToSend.Data, i, data, 0, _objectToSend.Data.Length - i);
+                    Array.Copy(message.Data, i, data, 0, message.Data.Length - i);
                 }
+
                 resultList.Add(new ProxyData
                 {
                     Data = data
                 });
             }
 
-            return [_objectToSend];
+            return resultList;
         }
     }
 }

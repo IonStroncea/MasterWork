@@ -73,7 +73,7 @@ namespace UssageMetter
                     string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
                     writer.WriteData(timestamp, ((int)(memUsage / 1024)).ToString(), cpuUsage.ToString());
                     
-                    Thread.Sleep(100);
+                    Thread.Sleep(300);
                 }
             });
 
