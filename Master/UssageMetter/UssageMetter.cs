@@ -30,8 +30,10 @@ namespace UssageMetter
 
             List<PerformanceCounter> memoryCounters = new();
             List<PerformanceCounter> cpuCounters = new();
+            List<long> previousCpuUssages = new();
+            PerformanceCounter idleCpuUsage = new PerformanceCounter("Processor", "% Idle Time", "_Total", true);
 
-            for(int i = 0; i <processes.Length; i++)
+            for (int i = 0; i <processes.Length; i++)
             { 
                 Process process = processes[i];
                 int memsize = 0; // memsize in KB
@@ -43,16 +45,19 @@ namespace UssageMetter
                 ram.ReadOnly = true;
                 
                 memoryCounters.Add(ram);
-
-                PerformanceCounter cpu = new PerformanceCounter("Process", "% Processor Time",
+                previousCpuUssages.Add(0);
+/*                PerformanceCounter cpu = new PerformanceCounter("Process", "% Processor Time",
                     i == 0 ? process.ProcessName : process.ProcessName + $"#{i}", true);
-                cpuCounters.Add(cpu);
-                
+                cpuCounters.Add(cpu);*/
+
             };
 
             bool work = true;
             Thread thread = new Thread(() => 
             {
+                long oldIdleCpuUsage = 0;
+                double cpuUsagePercent = 0.0d;
+                Stopwatch sw = Stopwatch.StartNew();
                 while (work)
                 {
                     double memUsage = 0;
@@ -61,19 +66,32 @@ namespace UssageMetter
                         memUsage += memory.NextValue();
                     });
 
-                    double cpuUsage = 0.0d;
-                    cpuCounters.ForEach(cpu =>
+/*                    double cpuUsage1 = 0.0d;
+                     cpuCounters.ForEach(cpu =>
                     {
-                        cpuUsage += cpu.NextValue();
+                        cpuUsage1 += cpu.NextValue();
 
                     });
-                    //Console.WriteLine($"Process use : {memUsage/1024} Kb");
-                    //Console.WriteLine("Process CPU % = " + cpuUsage);
+                    Console.WriteLine(cpuUsage1 / 6);*/
+                    double cpuUsage = 0.0d;
+                    sw.Stop();
+                    for (int i = 0; i < processes.Length; i++)
+                    {
+                        Process process = processes[i];
+                        long NewCpuUsage = (long)process.TotalProcessorTime.TotalMilliseconds;
+                        long msPassed = sw.ElapsedMilliseconds;
+                        cpuUsage += (NewCpuUsage - previousCpuUssages[i]) * 1.0d / (Environment.ProcessorCount * msPassed);
+                        previousCpuUssages[i] = NewCpuUsage;
+                    }
+                    cpuUsage *= 100;
+                    sw.Restart();
+                    //Console.WriteLine($"Process use : {memUsage/(1024*1024)} Mb");
+                    //Console.WriteLine("Process CPU % = " + cpuUsage );
 
                     string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
-                    writer.WriteData(timestamp, ((int)(memUsage / 1024)).ToString(), cpuUsage.ToString());
+                    writer.WriteData(timestamp, ((int)(memUsage / (1024*1024))).ToString(), cpuUsage.ToString());
                     
-                    Thread.Sleep(300);
+                    Thread.Sleep(1500);
                 }
             });
 
@@ -89,11 +107,11 @@ namespace UssageMetter
                 counter.Dispose();
             });
 
-            cpuCounters.ForEach(counter =>
+/*            cpuCounters.ForEach(counter =>
             {
                 counter.Close();
                 counter.Dispose();
-            });
+            });*/
         }
     }
 }

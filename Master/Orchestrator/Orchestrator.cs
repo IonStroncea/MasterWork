@@ -31,7 +31,7 @@ namespace Orchestrator
             string handlerType = "";
             int packetSize = 4000;        
             int timeToWait = 1;
-            int tokensPerTurn = 500;
+            int tokensPerTurn = 100;
             int end = 3;
             int sendersCopies = 333;
             int proxies = 1;
