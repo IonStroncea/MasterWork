@@ -23,12 +23,18 @@ namespace Sender
         /// -proxies list of proxies addresses and ports
         /// -return if return values
         /// -copies copies of senders
+        /// -multiple multiple tunnels
+        /// -nultipleListen
+        /// -multiplePort
         /// </param>
         public static void Main(string[] args)
         {
             string address = "127.0.0.1";
             int port = 9000;
             string name = "Sender";
+            bool multiple = false;
+            string nultipleListen = "127.0.0.1";
+            int multiplePort = 13000;
 
             int ttl = -1;
             int totalDataSize = -1;
@@ -96,6 +102,19 @@ namespace Sender
             {
                 dataSize = int.Parse(args[args.ToList().IndexOf("-size") + 1]);
             }
+            if (args.ToList().Contains("-multiple"))
+            {
+                multiple = true;
+            }
+
+            if (args.ToList().Contains("-nultipleListen"))
+            {
+                nultipleListen = args[args.ToList().IndexOf("-nultipleListen") + 1];
+            }
+            if (args.ToList().Contains("-multiplePort"))
+            {
+                multiplePort = int.Parse(args[args.ToList().IndexOf("-multiplePort") + 1]);
+            }
 
             List<ISender> senders = new ();
 
@@ -104,6 +123,8 @@ namespace Sender
                 
                 ISender sender = returnValues ? new SenderWithReturn(address, port, $"{name}_{i}", nextProxies)
                     : new BaseSender(address, port, $"{name}_{i}", nextProxies);
+
+                sender = multiple ? new SenderWithReturnSeparateChannels(address, port, $"{name}_{i}", nextProxies, nultipleListen, multiplePort) : sender;
                 
                 senders.Add(sender);
                 //senders.Add(new EncryptionBaseSender(address, port + i, name, nextProxies));
