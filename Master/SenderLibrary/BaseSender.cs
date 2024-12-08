@@ -28,7 +28,7 @@ namespace SenderLibrary
         /// <summary>
         /// Name of sender
         /// </summary>
-        private string _name;
+        protected string _name;
 
         /// <summary>
         /// Stream
@@ -68,6 +68,7 @@ namespace SenderLibrary
             }
             else
             {
+                //Console.WriteLine(proxyInfos[0].NextPort);
                 _client = new TcpClient(proxyInfos[0].NextAddress, proxyInfos[0].NextPort);
                 proxyInfos.Add(new ProxyInfo { NextAddress = serverAddress, NextPort = serverPort });
 
@@ -124,13 +125,13 @@ namespace SenderLibrary
                 i++;
                 sentdata += dataSize;
                 SendSpecificSizeData(dataSize);
-                double currentPercentage = ((sentdata * 1.0d) / (totalData * 1.0d)) * 10.0d;
+                double currentPercentage = ((sentdata * 1.0d) / (totalData * 1.0d)) * 20.0d;
                 if ((int)currentPercentage > percentage && _writer != null)
                 {
-                    Console.WriteLine($"{_name} sent {currentPercentage * 10.0d}% of data");
+                    Console.WriteLine($"{_name} sent {currentPercentage * 5.0d}% of data");
                     percentage = (int)currentPercentage;
                 }
-                Thread.Sleep(500);
+                //Thread.Sleep(500);
             }
 
             //Console.WriteLine($"{_name} successfully sent all data to {_serverAddress}:{_serverPort}");

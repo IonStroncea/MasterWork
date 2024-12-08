@@ -29,7 +29,7 @@ namespace ServerLibrary
         /// <summary>
         /// Caller id
         /// </summary>
-        private string _callerId = string.Empty;
+        protected string _callerId = string.Empty;
         
         /// <summary>
         /// CSV writer
@@ -89,9 +89,10 @@ namespace ServerLibrary
                 {
                     string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
                     _writer.WriteData(timestamp, avalableData.ToString());
-                    if (_callerId.Contains("1_0", StringComparison.CurrentCultureIgnoreCase))
+                    if (_callerId.Contains("_0", StringComparison.CurrentCultureIgnoreCase))
                     {
                         //Console.WriteLine(timestamp);
+                        //Console.WriteLine($"Received {avalableData} bytes of data from {_callerId}");
                     }
                     //Console.WriteLine($"Received {avalableData} bytes of data from {_callerId}");
                 }

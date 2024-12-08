@@ -41,6 +41,7 @@ namespace ProxyLibrary.Buffer
                 }
                 else
                 {
+                    data = new byte[message.Data.Length - i];
                     Array.Copy(message.Data, i, data, 0, message.Data.Length - i);
                 }
 

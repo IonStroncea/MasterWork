@@ -33,10 +33,14 @@ namespace SenderLibrary
 
                     if (totalRead >= messageLength)
                     {
-                        string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
-                        _writer.WriteData(timestamp, buffer.Length.ToString(), "returned");
+                        if (_writer != null)
+                        {
+                            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+                            _writer.WriteData(timestamp, buffer.Length.ToString(), "returned");
+                            //Console.WriteLine($"{_name} Received back data {buffer.Length}");
+                        }
                         waitRead = false;
-                        Console.WriteLine($"Received back data {buffer.Length}");
+                        //
                     }        
                 }
                 Thread.Sleep(2);

@@ -70,7 +70,7 @@ namespace ProxyLibrary.Buffer
             
             _bufferThread = new Thread(() =>
             {
-                Console.WriteLine($"Start listening");
+                //Console.WriteLine($"Start listening");
                 if (Sender != null)
                 {
                     Thread.Sleep(100);
@@ -112,7 +112,7 @@ namespace ProxyLibrary.Buffer
                         Sender = new ProxySender(message, _appId);
                         //Sender = new EncryptionProxySender(message, _appId);
                         
-                        Console.WriteLine($"Created sender to server {message.NextAddress} {message.NextPort}");
+                        //Console.WriteLine($"Created sender to server {message.NextAddress} {message.NextPort}");
                     }
                     else
                     {

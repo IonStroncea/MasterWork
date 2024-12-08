@@ -117,7 +117,7 @@ namespace ProxyLibrary
                 return;
             }
 
-            _server.Server.ReceiveTimeout = 1000;
+            //_server.Server.ReceiveTimeout = 100000;
 
             while (!_disposed)
             {

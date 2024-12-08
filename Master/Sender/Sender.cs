@@ -107,7 +107,7 @@ namespace Sender
                 
                 senders.Add(sender);
                 //senders.Add(new EncryptionBaseSender(address, port + i, name, nextProxies));
-                Console.WriteLine($"Created {name}_{i} sender to {address}:{port} size {dataSize}");
+                //Console.WriteLine($"Created {name}_{i} sender to {address}:{port} size {dataSize}");
             }
 
             List<Task> runTasks = new();

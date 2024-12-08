@@ -33,11 +33,11 @@ namespace Orchestrator
             int timeToWait = 1;
             int tokensPerTurn = 100;
             int end = 3;
-            int sendersCopies = 333;
+            int sendersCopies = 100;
             int proxies = 1;
-            int proxyCopies = 1;
+            int proxyCopies = 6;
 
-            bool returnValues = false;
+            bool returnValues = true;
 
             if (args.ToList().Contains("-end"))
             {

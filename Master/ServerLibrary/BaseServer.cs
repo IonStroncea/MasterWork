@@ -106,14 +106,14 @@ namespace ServerLibrary
                 return;
             }
 
-            _server.Server.ReceiveTimeout = 1000;
+            //_server.Server.ReceiveTimeout = 5000;
 
             while (!_disposed)
             {
                 TcpClient client = _server.AcceptTcpClient();
 
                 _handlers.Add(_returnValues ? new ServerConnectionHandlerWithReturn(client) : new ServerConnectionHandler(client));
-                Console.WriteLine($"Client connected");
+                //Console.WriteLine($"Client connected");
             }
         }
     }

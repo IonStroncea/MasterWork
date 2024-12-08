@@ -20,7 +20,10 @@ namespace ServerLibrary
             stream.Write(buffer, 0, buffer.Length);
             stream.Flush();
 
-            Console.WriteLine($"Sent back data {buffer.Length}");
+            if (_callerId.Contains("_0"))
+            {
+                //Console.WriteLine($"{_callerId} Sent back data {buffer.Length}");
+            }
         }
     }
 }
