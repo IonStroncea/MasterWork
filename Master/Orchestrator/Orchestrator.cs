@@ -1,8 +1,4 @@
-﻿using Sender;
-using Server;
-using System.Diagnostics;
-using System.IO;
-using System.Net.Http.Headers;
+﻿using System.Diagnostics;
 
 namespace Orchestrator
 {
@@ -24,6 +20,7 @@ namespace Orchestrator
         /// -wait wait time
         /// -proxies nr of proxies
         /// -return if return values
+        /// -multiple multiple tunnels
         /// </param>
         public static void Main(string[] args)
         {
@@ -33,12 +30,17 @@ namespace Orchestrator
             int timeToWait = 1;
             int tokensPerTurn = 100;
             int end = 3;
-            int sendersCopies = 100;
+            int sendersCopies = 333;
             int proxies = 1;
             int proxyCopies = 6;
+            bool multiple = true;
 
-            bool returnValues = true;
+            bool returnValues = false;
 
+            if (args.ToList().Contains("-multiple"))
+            {
+                multiple = true;
+            }
             if (args.ToList().Contains("-end"))
             {
                 end = int.Parse(args[args.ToList().IndexOf("-end") + 1]);
@@ -92,31 +94,84 @@ namespace Orchestrator
             string address = "127.0.0.1";
             string returnValuesString = returnValues ? "-return" : "";
 
-            for (int i = 0; i < end; i++)
-            {              
-                Process server = new Process();
-                server.StartInfo.FileName = "Server.exe";
-                server.StartInfo.Arguments = $"/c -f {address} -p {serverPort + i} {returnValuesString}";
-
-                servers.Add(server);
-            }
-            Random random = new();
-            for (int i = 0; i <end; i++)
+            if (!multiple)
             {
-                Process sender = new Process();
-                sender.StartInfo.FileName = "Sender.exe";
-                string proxiesString= "";
-                int currentCopies = sendersCopies;
-
-                for (int j = 0; j < proxies || j < proxyCopies; j++)
+                for (int i = 0; i < end; i++)
                 {
-                    proxiesString += $" 127.0.0.1 {10000 + j}";
+                    Process server = new Process();
+                    server.StartInfo.FileName = "Server.exe";
+                    server.StartInfo.Arguments = $"/c -f {address} -p {serverPort + i} {returnValuesString}";
+
+                    servers.Add(server);
                 }
+            }
+            else 
+            {
+                for (int i = 0; i < end; i++)
+                {
+                    Process server = new Process();
+                    server.StartInfo.FileName = "Server.exe";
+                    server.StartInfo.Arguments = $"/c -multiple -f {address} -p {serverPort + i} {returnValuesString}";
 
-                sender.StartInfo.Arguments = $"/c -copies {currentCopies} {returnValuesString} -p {serverPort + i} -total {1000000} -size {(int)(1024 + random.NextInt64(2048))} -n {i + 1} -nrOfProxies {Math.Max(proxies, proxyCopies)} -proxies{proxiesString}";
+                    servers.Add(server);
+                }
+            }
+
+            Random random = new();
+
+            if (!multiple)
+            {
+                for (int i = 0; i < end; i++)
+                {
+                    Process sender = new Process();
+                    sender.StartInfo.FileName = "Sender.exe";
+                    string proxiesString = "";
+                    int currentCopies = sendersCopies;
+
+                    for (int j = 0; j < proxies || j < proxyCopies; j++)
+                    {
+                        proxiesString += $" 127.0.0.1 {10000 + j}";
+                    }
+
+                    sender.StartInfo.Arguments = $"/c -multiple -copies {currentCopies} {returnValuesString} -p {serverPort + i} -total {1000000} -size {(int)(1024 + random.NextInt64(2048))} -n {i + 1} -nrOfProxies {Math.Max(proxies, proxyCopies)} -proxies{proxiesString}";
 
 
-                senders.Add(sender);
+                    senders.Add(sender);
+                }
+            }
+            else 
+            {
+                for (int i = 0; i < end; i++)
+                {
+                    Process sender = new Process();
+                    sender.StartInfo.FileName = "Sender.exe";
+                    string proxiesString = "";
+                    int currentCopies = sendersCopies;
+
+                    for (int j = 0; j < proxies / 2 || j < proxyCopies / 2; j++)
+                    {
+                        proxiesString += $" 127.0.0.1 {10000 + random.NextInt64(Math.Max(proxies, proxyCopies))}";
+                    }
+
+                    proxiesString += $" 127.0.0.1 {serverPort + i}";
+
+                    proxiesString += $" 127.0.0.1 {10000 + 1}";
+                    proxiesString += $" 127.0.0.1 {10000 + 5}";
+                    proxiesString += $" 127.0.0.1 {10000 + 3}";
+
+                    proxiesString += $" 127.0.0.1 {10000 + 0}";
+                    proxiesString += $" 127.0.0.1 {10000 + 4}";
+                    proxiesString += $" 127.0.0.1 {10000 + 2}";
+
+                    for (int j = 0; j < proxies / 2 || j < proxyCopies / 2; j++)
+                    {
+                        proxiesString += $" 127.0.0.1 {10000 + random.NextInt64(Math.Max(proxies, proxyCopies))}";
+                    }
+
+                    sender.StartInfo.Arguments = $"/c -multiple -nultipleListen 127.0.0.1 -multiplePort {13000 + i * currentCopies} -copies {currentCopies} {returnValuesString} -p {13000 + i * currentCopies} -total {1000000} -size {(int)(1024 + random.NextInt64(2048))} -n {i + 1} -nrOfProxies {Math.Max(proxies, proxyCopies)} -proxies{proxiesString}";
+
+                    senders.Add(sender);
+                }
             }
 
             List<Process> proxiesList = new();

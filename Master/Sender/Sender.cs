@@ -120,12 +120,16 @@ namespace Sender
 
             for (int i = 0; i < copies; i++)
             {
-                
-                ISender sender = returnValues ? new SenderWithReturn(address, port, $"{name}_{i}", nextProxies)
-                    : new BaseSender(address, port, $"{name}_{i}", nextProxies);
-
-                sender = multiple ? new SenderWithReturnSeparateChannels(address, port, $"{name}_{i}", nextProxies, nultipleListen, multiplePort) : sender;
-                
+                ISender sender;
+                if (!multiple)
+                {
+                    sender = returnValues ? new SenderWithReturn(address, port, $"{name}_{i}", nextProxies)
+                        : new BaseSender(address, port, $"{name}_{i}", nextProxies);
+                }
+                else
+                {
+                    sender = new SenderWithReturnSeparateChannels(address, port + i, $"{name}_{i}", nextProxies, nultipleListen, multiplePort + i);
+                }
                 senders.Add(sender);
                 //senders.Add(new EncryptionBaseSender(address, port + i, name, nextProxies));
                 //Console.WriteLine($"Created {name}_{i} sender to {address}:{port} size {dataSize}");

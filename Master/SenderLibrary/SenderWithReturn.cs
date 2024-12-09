@@ -37,7 +37,7 @@ namespace SenderLibrary
                         {
                             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
                             _writer.WriteData(timestamp, buffer.Length.ToString(), "returned");
-                            //Console.WriteLine($"{_name} Received back data {buffer.Length}");
+                            Console.WriteLine($"{_name} Received back data {buffer.Length}");
                         }
                         waitRead = false;
                         //

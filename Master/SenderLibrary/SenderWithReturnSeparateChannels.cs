@@ -17,7 +17,7 @@ namespace SenderLibrary
         private TcpListener _tcpListener;
 
         /// <summary>
-        /// Client to listen to
+        /// Client to sendTo
         /// </summary>
         private TcpClient? _tcpClient = null;
 
@@ -32,6 +32,7 @@ namespace SenderLibrary
         /// <param name="listenPort">Listen port</param>
         public SenderWithReturnSeparateChannels(string serverAddress, int serverPort, string name, List<ProxyInfo> proxyInfos, string listenAddress, int listenPort) : base(serverAddress, serverPort, name, proxyInfos)
         {
+
             IPAddress address = IPAddress.Parse(listenAddress);
             _tcpListener = new TcpListener(address, listenPort);
             _tcpListener.Start();

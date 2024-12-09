@@ -14,7 +14,7 @@ namespace ServerLibrary
         /// <summary>
         /// Tcp client used for connection
         /// </summary>
-        private TcpClient _client;
+        protected TcpClient _client;
 
         /// <summary>
         /// Handler thread.
@@ -34,7 +34,7 @@ namespace ServerLibrary
         /// <summary>
         /// CSV writer
         /// </summary>
-        private CSVWriter? _writer;
+        protected CSVWriter? _writer;
 
         /// <summary>
         /// Constructor. Set tcp client to receive data
@@ -60,7 +60,7 @@ namespace ServerLibrary
         /// <summary>
         /// Reads data from connection
         /// </summary>
-        public void ReadData()
+        public virtual void ReadData()
         {
             int avalableData = _client.Available;
             if (avalableData>0)

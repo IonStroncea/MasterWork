@@ -13,15 +13,21 @@ namespace Server
         /// </summary>
         /// <param name="args">Arguments -f address of server -p port of server -t time to live in seconds
         /// -return if return values
+        /// -multiple multiple tunnels
         /// </param>
         public static void Main(string[] args)
         {
             string address = "127.0.0.1";
             int port = 9000;
             bool returnValues = false;
+            bool multiple = false;
 
             int ttl = -1;
 
+            if (args.ToList().Contains("-multiple"))
+            {
+                multiple = true;
+            }
             if (args.ToList().Contains("-return"))
             {
                 returnValues = true;
@@ -40,7 +46,7 @@ namespace Server
                 ttl = int.Parse(args[args.ToList().IndexOf("-t") + 1]);
             }
 
-            BaseServer server = new BaseServer(address, port, returnValues);
+            BaseServer server = new BaseServer(address, port, returnValues, multiple);
             server.Start();
 
             if (ttl > -1)

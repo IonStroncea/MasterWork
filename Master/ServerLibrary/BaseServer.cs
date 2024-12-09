@@ -44,16 +44,23 @@ namespace ServerLibrary
         private bool _returnValues;
 
         /// <summary>
+        /// Flag if multiple tunnels
+        /// </summary>
+        private bool _multiple;
+
+        /// <summary>
         /// Constructor. Sets address and port to listen to
         /// </summary>
         /// <param name="address">Address to run</param>
         /// <param name="port">Port</param>
         /// <param name="returnValues">True if send back balues</param>
-        public BaseServer(string address, int port, bool returnValues)
+        /// <param name="multiple">True if multiple tunnels</param>
+        public BaseServer(string address, int port, bool returnValues, bool multiple)
         {
             _address = address;
             _port = port;
             _returnValues = returnValues;
+            _multiple = multiple;
         }
 
         /// <summary>
@@ -112,7 +119,14 @@ namespace ServerLibrary
             {
                 TcpClient client = _server.AcceptTcpClient();
 
-                _handlers.Add(_returnValues ? new ServerConnectionHandlerWithReturn(client) : new ServerConnectionHandler(client));
+                if (!_multiple)
+                {
+                    _handlers.Add(_returnValues ? new ServerConnectionHandlerWithReturn(client) : new ServerConnectionHandler(client));
+                }
+                else 
+                {
+                    _handlers.Add(new ServerConnectionHandlerWithReturnSeparateTunnels(client));
+                }
                 //Console.WriteLine($"Client connected");
             }
         }
